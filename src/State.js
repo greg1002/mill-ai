@@ -14,7 +14,7 @@ export default function State(board_type, turn) {
   // For each tile on the board, "B" represents a black piece,
   // "W" a white piece, "E" an empty spot, and null no spot at all
   this.board = board_layouts[this.board_type].init;
-
+  this.selected = null;
   this.possible_moves = this.get_possible_moves();
   this.pieces = {"B": 0, "W": 0};
   this.winner = null;
@@ -35,11 +35,14 @@ State.prototype.move = function(command) {
   if (!valid_command) throw console.error("Invalid Command");
 
   //evaluates command and constructs new state
-  if (command.action == "place" || command.action == "move") {
-    _this.board[command.to.x][command.to.y] = _this.turn;
+  if (_this.action == "place" || _this.action == "move_to") {
+    _this.board[command.x][command.y] = _this.turn;
 
-    if (command.action == "move") {
-      _this.board[command.from.x][command.from.y] = "E";
+    if (_this.action == "move_to") {
+      _this.board[_this.selected.x][_this.selected.y] = "E";
+      _this.selected = null;
+    } else {
+      _this.pieces[_this.turn] += 1;
     }
 
     //checks if new place for piece would newly form a mill
@@ -53,7 +56,7 @@ State.prototype.move = function(command) {
         if (_this.board[loc.x][loc.y] != _this.turn) {
           is_in_mill = false;
         }
-        if (_.isEqual(loc, command.to)) {
+        if (_.isEqual(loc, command)) {
           new_piece_in_mill = true;
         }
       });
@@ -66,16 +69,21 @@ State.prototype.move = function(command) {
     //makes adjustments to state based on move
     if (is_new_mill) {
       _this.action = "take";
-    } else {
+      _this.possible_moves = _this.get_possible_moves();
+    }
+    if (!is_new_mill || _this.possible_moves.length == 0) {
       _this.turn = _this.turn == "W" ? "B" : "W";
       _this.move_count += 1;
-      if (_this.action != "move" && _this.move_count > board_info.pieces * 2) {
-        _this.action = "move";
+      if (_this.move_count > board_info.pieces * 2) {
+        _this.action = "move_from";
       }
     }
-  } else if (command.action = "take") {
+  } else if (_this.action == "move_from") {
+    _this.selected = command;
+    _this.action = "move_to";
+  } else if (_this.action == "take") {
     //evaluates command and constructs new state
-    _this.board[command.from.x][command.from.y] = "E";
+    _this.board[command.x][command.y] = "E";
     const opp = _this.turn == "W" ? "B" : "W";
     _this.pieces[opp] -= 1;
 
@@ -84,12 +92,14 @@ State.prototype.move = function(command) {
       if (_this.pieces[opp] < 3) {
         _this.winner = _this.turn;
       }
-      _this.action = "move";
+      _this.action = "move_from";
     } else {
       _this.action = "place";
     }
+    _this.turn = opp;
   }
   _this.possible_moves = _this.get_possible_moves();
+  console.log(_this);
   return _this;
 }
 
@@ -103,18 +113,25 @@ State.prototype.get_possible_moves = function () {
     for (let y = 0; y < board[x].length; y++) {
       if (this.action == "place") {
         if (board[x][y] == "E") {
-          possible_moves.push({action: "place", to: {x: x, y: y}});
+          possible_moves.push({x: x, y: y});
         }
-      } else if (this.action == "move") {
+      } else if (this.action == "move_from") {
         //Checks if origin is of player int turn's color
         if (board[x][y] == this.turn) {
           //Checks for each adjacency wheter destination is empty
           board_info.adjecencies[x][y].forEach(loc => {
             if (board[loc.x][loc.y] == "E") {
-              possible_moves.push({action: "move", from: {x: x, y: y}, to: {x: loc.x, y: loc.y}});
+              possible_moves.push({x: x, y: y});
+              return;
             }
           });
         }
+      } else if (this.action == "move_to") {
+        board_info.adjecencies[this.selected.x][this.selected.y].forEach(loc => {
+          if (board[loc.x][loc.y] == "E") {
+            possible_moves.push({x: loc.x, y: loc.y});
+          }
+        });
       } else if (this.action == "take") {
         //check if tile to take is other player's
         const opposite = this.turn == "W" ? "B" : "W";
@@ -125,20 +142,28 @@ State.prototype.get_possible_moves = function () {
         for (let i = 0; i < board_info.mills.length; i++) {
           const mill = board_info.mills[i];
           let is_mill = true;
+          let xy_in_this_mill = false;
           mill.forEach(loc => {
             if (board[loc.x][loc.y] != opposite) {
               is_mill = false;
+              return;
+            }
+            if (x == loc.x && y == loc.y) {
+              xy_in_this_mill = true;
             }
           });
-          if (is_mill) is_in_mill = true;
+          if (is_mill && xy_in_this_mill) {
+            console.log(mill);
+            is_in_mill = true;
+          }
         }
 
         //If tile is not in opposing mill, then taking it is possible
         if (!is_in_mill) {
-          possible_moves.push({action: "take", from: {x: x, y: y}});
+          possible_moves.push({x: x, y: y});
         }
       } else {
-        throw "State.action must be 'place', 'move', or 'take'";
+        throw "State.action must be 'place', 'move_to', 'move_from', or 'take'";
         break;
       }
     }

@@ -1,12 +1,16 @@
 .board {
-  width: 600px;
-  height: 600px;
+  width: 800px;
+  height: 800px;
   margin: 0 auto;
+  position: relative;
 }
 
 img {
     max-width: 100%;
     max-height: 100%;
+    position: relative;
+    left: 0;
+    top: 0;
 }
 
 .game {
@@ -15,4 +19,11 @@ img {
 
 h1 {
   color: white;
+}
+
+.piece {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
 }
