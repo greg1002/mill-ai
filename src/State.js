@@ -34,6 +34,8 @@ State.prototype.move = function(command) {
   }
   if (!valid_command) throw console.error("Invalid Command");
 
+  const last_action = _this.action;
+
   //evaluates command and constructs new state
   if (_this.action == "place" || _this.action == "move_to") {
     _this.board[command.x][command.y] = _this.turn;
@@ -99,6 +101,13 @@ State.prototype.move = function(command) {
     _this.turn = opp;
   }
   _this.possible_moves = _this.get_possible_moves();
+  if (_this.possible_moves.length == 0) {
+    if (_this.action == "take") {
+      _this.winner = _this.turn
+    } else {
+      _this.winner = _this.turn == "W" ? "B" : "W";
+    }
+  }
   console.log(_this);
   return _this;
 }
@@ -109,6 +118,14 @@ State.prototype.get_possible_moves = function () {
   const possible_moves = [];
   const board = this.board;
   const board_info = board_layouts[this.board_type];
+  if (this.action == "move_to") {
+    board_info.adjecencies[this.selected.x][this.selected.y].forEach(loc => {
+      if (board[loc.x][loc.y] == "E") {
+        possible_moves.push({x: loc.x, y: loc.y});
+      }
+    });
+    return possible_moves;
+  }
   for (let x = 0; x < board.length; x++) {
     for (let y = 0; y < board[x].length; y++) {
       if (this.action == "place") {
@@ -126,12 +143,6 @@ State.prototype.get_possible_moves = function () {
             }
           });
         }
-      } else if (this.action == "move_to") {
-        board_info.adjecencies[this.selected.x][this.selected.y].forEach(loc => {
-          if (board[loc.x][loc.y] == "E") {
-            possible_moves.push({x: loc.x, y: loc.y});
-          }
-        });
       } else if (this.action == "take") {
         //check if tile to take is other player's
         const opposite = this.turn == "W" ? "B" : "W";

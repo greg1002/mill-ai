@@ -4,27 +4,10 @@ import './style/game.css';
 import ReactCursorPosition, { INTERACTIONS } from 'react-cursor-position';
 import State from './State.js';
 
+const WHITE_COLOR = '#F1E9C9';
+const BLACK_COLOR = '#404040';
 
 export default class Game extends Component {
-
-  state = {
-
-  }
-
-  render() {
-    return (
-      <div className="game">
-        <h1>Mill</h1>
-        <div className="board">
-            <Board
-            />
-        </div>
-      </div>
-    )
-  }
-}
-
-class Board extends Component {
 
   state = {
     gs: new State("board_standard","B")
@@ -48,20 +31,66 @@ class Board extends Component {
     return isActive;
   }
 
-  render() {
-    const pieces = this.state.gs.board.map((column,x) => {
-      return (column.map((tile, y) => {
-        return (<Space
-          x={x} y={y} type={tile}
-          makeMoveOnClick={this.makeMoveOnClick}
-          />);
-      }));
-    });
+  getInfoText = () => {
+    const {gs} = this.state;
     return (
-      <React.Fragment>
-        <img src={board_standard} />
-        {pieces}
-      </React.Fragment>
+      <h2 style={{
+          color: gs.winner == "B" ? 'black' :
+                 gs.winner == "W" ? 'white' :
+                 gs.turn == "B" ? 'black' : 'white'
+      }}>{
+        gs.winner == "B" ? "Black wins!" :
+        gs.winner == "W" ? "White wins!" :
+        (gs.turn == "B" ? "black" : "white") + " to " +
+        (gs.action == "place" ? "place" :
+          gs.action == "take" ? "take" :
+          "move")
+      }</h2>
+    )
+  }
+
+  getPieces = () => {
+    const {gs} = this.state;
+    let i = -1;
+    return (
+        gs.board.map((column,x) => {
+        return (column.map((tile, y) => {
+          i++;
+          let possibleMove = false;
+          gs.possible_moves.forEach(move => {
+            if (move.x == x && move.y == y) {
+              possibleMove = true;
+              return;
+            }
+          })
+          if (tile != null) {
+          return (
+              <Space
+              x={x} y={y} type={tile} key={i}
+              possibleMove={possibleMove}
+              action={gs.action}
+              makeMoveOnClick={this.makeMoveOnClick}
+              />);
+          } else return
+        }));
+      })
+    )
+  }
+
+  onEnter = () => {
+    console.log("works");
+  }
+
+  render() {
+    return (
+      <div className="game">
+        <h1>Mill</h1>
+        <div className="board">
+          <img src={board_standard} />
+          {this.getPieces()}
+        </div>
+        <h2>{this.getInfoText()}</h2>
+      </div>
     )
   }
 }
@@ -81,16 +110,20 @@ class Space extends Component {
         activationInteractionMouse={INTERACTIONS.CLICK}
         onActivationChanged={this.onMouseClick}
       >
-      <div className="piece"
-        style={
-          {
-            top: 100 * this.props.y + 80,
-            left: 100 * this.props.x + 80,
-            backgroundColor: this.props.type == "B" ? '#404040' :
-                                this.props.type == "W" ? '#F1E9C9' : ''
-          }
-        }/>
-    </ReactCursorPosition>
+        {this.props.possibleMove ? <div className="piece-outline"
+          style ={{
+            top: 100 * this.props.y + 78,
+            left: 100 * this.props.x + 78,
+            backgroundColor: this.props.action == 'take' ? 'red' : 'black'
+          }}/> : <div />}
+        <div className="piece"
+          style={{
+              top: 100 * this.props.y + 80,
+              left: 100 * this.props.x + 80,
+              backgroundColor: this.props.type == "B" ? BLACK_COLOR :
+                                  this.props.type == "W" ? WHITE_COLOR : 'white'
+            }}/>
+      </ReactCursorPosition>
     )
   }
 
