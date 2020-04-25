@@ -1,7 +1,7 @@
 import board_layouts from './Layouts.js';
 import _ from 'lodash';
 
-export default function State(board_type, turn) {
+export default function Gamestate(board_type, turn) {
   //Player's whose turn it is
   this.turn = turn;
   //Action to do
@@ -15,36 +15,51 @@ export default function State(board_type, turn) {
   // "W" a white piece, "E" an empty spot, and null no spot at all
   this.board = board_layouts[this.board_type].init;
   this.selected = null;
-  this.possible_moves = this.get_possible_moves();
+  this.possible_moves = [];
   this.pieces = {"B": 0, "W": 0};
   this.winner = null;
+
+  this.get_possible_moves();
 }
 
-State.prototype.move = function(command) {
-  let _this = this;
+// Clones this game state
+Gamestate.prototype.clone = function() {
+  let clone = new Gamestate(this.board_type, this.turn);
+  clone.action = this.action;
+  clone.move_count = this.move_count;
+  clone.board = JSON.parse(JSON.stringify(this.board));
+  clone.selected = Object.assign({},this.selected);
+  clone.possible_moves = JSON.parse(JSON.stringify(this.possible_moves));
+  clone.pieces = Object.assign({},this.pieces);
+  clone.winner = this.winner;
+  return clone;
+}
+
+// Executes a move based on the command and returns/updates the resulting state
+Gamestate.prototype.move = function(command) {
   const board_info = board_layouts[this.board_type];
 
   //checks command validity
   let valid_command = false;
-  for (let i = 0; i < _this.possible_moves.length; i++) {
-    if (_.isEqual(_this.possible_moves[i], command)) {
+  for (let i = 0; i < this.possible_moves.length; i++) {
+    if (_.isEqual(this.possible_moves[i], command)) {
       valid_command = true;
        break;
     }
   }
-  if (!valid_command) throw console.error("Invalid Command");
+  if (!valid_command) throw console.error("Invalid Command:", command);
 
-  const last_action = _this.action;
+  const last_action = this.action;
 
   //evaluates command and constructs new state
-  if (_this.action == "place" || _this.action == "move_to") {
-    _this.board[command.x][command.y] = _this.turn;
+  if (this.action == "place" || this.action == "move_to") {
+    this.board[command.x][command.y] = this.turn;
 
-    if (_this.action == "move_to") {
-      _this.board[_this.selected.x][_this.selected.y] = "E";
-      _this.selected = null;
+    if (this.action == "move_to") {
+      this.board[this.selected.x][this.selected.y] = "E";
+      this.selected = null;
     } else {
-      _this.pieces[_this.turn] += 1;
+      this.pieces[this.turn] += 1;
     }
 
     //checks if new place for piece would newly form a mill
@@ -55,7 +70,7 @@ State.prototype.move = function(command) {
       let new_piece_in_mill = false;
       let is_in_mill = true;
       mill.forEach(loc => {
-        if (_this.board[loc.x][loc.y] != _this.turn) {
+        if (this.board[loc.x][loc.y] != this.turn) {
           is_in_mill = false;
         }
         if (_.isEqual(loc, command)) {
@@ -70,49 +85,49 @@ State.prototype.move = function(command) {
 
     //makes adjustments to state based on move
     if (is_new_mill) {
-      _this.action = "take";
-      _this.possible_moves = _this.get_possible_moves();
+      this.action = "take";
+      this.possible_moves = this.get_possible_moves();
     }
-    if (!is_new_mill || _this.possible_moves.length == 0) {
-      _this.turn = _this.turn == "W" ? "B" : "W";
-      _this.move_count += 1;
-      if (_this.move_count > board_info.pieces * 2) {
-        _this.action = "move_from";
+    if (!is_new_mill || this.possible_moves.length == 0) {
+      this.turn = this.turn == "W" ? "B" : "W";
+      this.move_count += 1;
+      if (this.move_count > board_info.pieces * 2) {
+        this.action = "move_from";
       }
     }
-  } else if (_this.action == "move_from") {
-    _this.selected = command;
-    _this.action = "move_to";
-  } else if (_this.action == "take") {
+  } else if (this.action == "move_from") {
+    this.selected = command;
+    this.action = "move_to";
+  } else if (this.action == "take") {
     //evaluates command and constructs new state
-    _this.board[command.x][command.y] = "E";
-    const opp = _this.turn == "W" ? "B" : "W";
-    _this.pieces[opp] -= 1;
+    this.board[command.x][command.y] = "E";
+    const opp = this.turn == "W" ? "B" : "W";
+    this.pieces[opp] -= 1;
 
     //makes adjustments to state based on move
-    if (_this.move_count > board_info.pieces * 2) {
-      if (_this.pieces[opp] < 3) {
-        _this.winner = _this.turn;
+    if (this.move_count > board_info.pieces * 2) {
+      if (this.pieces[opp] < 3) {
+        this.winner = this.turn;
       }
-      _this.action = "move_from";
+      this.action = "move_from";
     } else {
-      _this.action = "place";
+      this.action = "place";
     }
-    _this.turn = opp;
+    this.turn = opp;
   }
-  _this.possible_moves = _this.get_possible_moves();
-  if (_this.possible_moves.length == 0) {
-    if (_this.action == "take") {
-      _this.winner = _this.turn
+  this.possible_moves = this.get_possible_moves();
+  if (this.possible_moves.length == 0) {
+    if (this.action == "take") {
+      this.winner = this.turn
     } else {
-      _this.winner = _this.turn == "W" ? "B" : "W";
+      this.winner = this.turn == "W" ? "B" : "W";
     }
   }
-  console.log(_this);
-  return _this;
+  return this;
 }
 
-State.prototype.get_possible_moves = function () {
+// Returns/updates a list of possible moves from this state
+Gamestate.prototype.get_possible_moves = function () {
   if (this.winner != null) return [];
 
   const possible_moves = [];
@@ -164,7 +179,6 @@ State.prototype.get_possible_moves = function () {
             }
           });
           if (is_mill && xy_in_this_mill) {
-            console.log(mill);
             is_in_mill = true;
           }
         }
@@ -174,12 +188,11 @@ State.prototype.get_possible_moves = function () {
           possible_moves.push({x: x, y: y});
         }
       } else {
-        throw "State.action must be 'place', 'move_to', 'move_from', or 'take'";
+        throw "Gamestate.action must be 'place', 'move_to', 'move_from', or 'take'";
         break;
       }
     }
   }
+  this.possible_moves = possible_moves;
   return possible_moves;
 }
-
-var state = new State("board_standard", "B");

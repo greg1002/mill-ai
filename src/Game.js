@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import board_standard from './images/board_standard.png';
 import './style/game.css';
 import ReactCursorPosition, { INTERACTIONS } from 'react-cursor-position';
-import State from './State.js';
+import Gamestate from './Gamestate.js';
+import Node from './Node.js'
 
 const WHITE_COLOR = '#F1E9C9';
 const BLACK_COLOR = '#404040';
@@ -10,7 +11,7 @@ const BLACK_COLOR = '#404040';
 export default class Game extends Component {
 
   state = {
-    gs: new State("board_standard","B")
+    gs: new Gamestate("board_standard","B")
   }
 
   makeMoveOnClick = (x, y) => {
