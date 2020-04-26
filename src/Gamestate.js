@@ -22,6 +22,10 @@ export default function Gamestate(board_type, turn) {
   this.get_possible_moves();
 }
 
+Gamestate.prototype.random_move = function() {
+  return this.possible_moves[Math.floor(Math.random()*this.possible_moves.length)];
+}
+
 // Clones this game state
 Gamestate.prototype.clone = function() {
   let clone = new Gamestate(this.board_type, this.turn);
