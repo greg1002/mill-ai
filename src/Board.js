@@ -3,27 +3,20 @@ import board_standard from './images/board_standard.png';
 import './style/game.css';
 import ReactCursorPosition, { INTERACTIONS } from 'react-cursor-position';
 import Gamestate from './Gamestate.js';
-import Node from './Node.js'
 
 const WHITE_COLOR = '#F1E9C9';
 const BLACK_COLOR = '#404040';
 
-export default class Game extends Component {
-
-  state = {
-    gs: new Gamestate("board_standard","B")
-  }
+export default class Board extends Component {
 
   makeMoveOnClick = (x, y) => {
-    if (this.tileIsActive(x,y)) {
-      var newState = this.state.gs.move({x: x, y: y});
-      this.setState({gs: newState});
-    }
+    if (this.tileIsActive(x,y))
+      this.props.makeMove(x,y)
   }
 
   tileIsActive = (x, y) => {
     let isActive = false;
-    this.state.gs.possible_moves.forEach(item => {
+    this.props.gs.possible_moves.forEach(item => {
       if (x == item.x && y == item.y) {
         isActive = true;
         return;
@@ -32,26 +25,8 @@ export default class Game extends Component {
     return isActive;
   }
 
-  getInfoText = () => {
-    const {gs} = this.state;
-    return (
-      <h2 style={{
-          color: gs.winner == "B" ? 'black' :
-                 gs.winner == "W" ? 'white' :
-                 gs.turn == "B" ? 'black' : 'white'
-      }}>{
-        gs.winner == "B" ? "Black wins!" :
-        gs.winner == "W" ? "White wins!" :
-        (gs.turn == "B" ? "black" : "white") + " to " +
-        (gs.action == "place" ? "place" :
-          gs.action == "take" ? "take" :
-          "move")
-      }</h2>
-    )
-  }
-
   getPieces = () => {
-    const {gs} = this.state;
+    const {gs} = this.props;
     let i = -1;
     return (
         gs.board.map((column,x) => {
@@ -85,12 +60,10 @@ export default class Game extends Component {
   render() {
     return (
       <div className="game">
-        <h1>Mill</h1>
         <div className="board">
           <img src={board_standard} />
           {this.getPieces()}
         </div>
-        <h2>{this.getInfoText()}</h2>
       </div>
     )
   }

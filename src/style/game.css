@@ -13,16 +13,6 @@ img {
     top: 0;
 }
 
-.game {
-  text-align: center;
-}
-
-h1 {
-  color: white;
-}
-h2 {
-  margin-top: -50px;
-}
 .piece {
   position: absolute;
   width: 40px;
