@@ -11,37 +11,39 @@ export default function Node(gs) {
   this.parent = null;
 }
 
-Node.prototype.toPrimitive = function(command) {
-  return command.x * 100 + command.y
+Node.prototype.toPrimitive = function(move) {
+  return move.x * 100 + move.y
+}
+
+Node.prototype.get_child = function(move) {
+  let child = this.children.get(this.toPrimitive(move));
+  if (child == null) return this.expand(move);
+  else return child;
 }
 
 // Expands the tree from this node by [d] layers
-Node.prototype.expand = function() {
-  const parent = this;
-  let children = this.children;
-  this.gs.possible_moves.forEach(command => {
-    let child = new Node(parent.gs.clone().move(command));
-    child.parent = parent;
-    children.set(this.toPrimitive(command), child);
-    if (parent.gs.turn == child.gs.turn) child.expand();
-    return child;
-  })
-  this.children = children;
-  return this;
+Node.prototype.expand = function(move) {
+  let child = this.children.get(this.toPrimitive(move));
+  if (child == null) {
+    child = new Node(this.gs.clone().move(move));
+    child.parent = this;
+    this.children.set(this.toPrimitive(move), child);
+  }
+  return child;
 }
 
 // Chooses a random node from this nodes children
 Node.prototype.choose = function() {
-  if (this.children.size == 0) this.children.expand();
-  let child = this.children.get(this.toPrimitive(this.gs.random_move()));
-  if (child.gs.turn == this.gs.turn) return child.choose();
-  else return child;
+  return this.get_child(this.gs.random_move());
 }
 
 Node.prototype.advance = function(move) {
-  let child = this.children.get(this.toPrimitive(move));
-  child.parent = null;
-  return child;
+  let child = this.get_child(move);
+  this.gs = child.gs;
+  this.children = child.children;
+  this.simulations = child.simulations;
+  this.wins = child.wins;
+  this.parent = null;
 }
 
 /* Plays out a game randomly from the current gamestate of this node. Returns
@@ -49,10 +51,24 @@ Node.prototype.advance = function(move) {
 Node.prototype.simulate = function() {
   let gs = this.gs.clone();
   while (gs.winner == null) {
-    let command = gs.random_move();
-    gs.move(command);
+    gs.move(gs.random_move());
   }
-  return gs.winner;
+  this.backpropogate(gs.winner);
+}
+
+Node.prototype.best_move = function() {
+  let max_winrate = 0;
+  let best_move = null;
+  for (let i = 0; i < this.gs.possible_moves.length; i++) {
+    let move = this.gs.possible_moves[i];
+    let child = this.get_child(move);
+    let winrate = child.wins[child.gs.turn] / child.simulations;
+    if (winrate > max_winrate) {
+      best_move = move;
+      max_winrate = winrate;
+    }
+  }
+  return best_move
 }
 
 /* Backpropogates the value of [b] from this node */
@@ -64,28 +80,35 @@ Node.prototype.backpropogate = function(w) {
 
 //Returns the upper confidence bound of this node
 Node.prototype.UCT = function() {
-  if (this.parent == null) return 0;
-  if (this.simulations == 0) return 100;
+  if (this.parent == null) {
+    return 0;
+  }
+  if (this.simulations == 0) {
+    return 100;
+  }
   return this.wins[this.gs.turn] / this.simulations + EXPLORATION_PARAMETER * Math.sqrt(Math.log(this.parent.simulations) / this.simulations);
 }
 
 // Returns true if current node is leaf, else false
 Node.prototype.is_leaf = function() {
-  return (this.children.size == 0);
+  return (this.children.size == 0 || this.gs.possible_moves.length == 0);
 }
 
 /* Travels down the tree until hitting a leaf node and returns it, selecting
    a new Node based on the max UCT among a node's children */
 Node.prototype.select = function() {
-  if (this.children.size == 0) return this;
+  if (this.is_leaf()) return this;
   let maxUCT = 0;
   let selectedChild = null;
-  for (let [key, value] of this.children) {
-    let uct = value.UCT();
+  for (let i = 0; i < this.gs.possible_moves.length; i++) {
+    let move = this.gs.possible_moves[i];
+    let child = this.get_child(move);
+    let uct = child.UCT();
     if (uct > maxUCT) {
-      selectedChild = value;
+      selectedChild = child;
       maxUCT = uct;
     }
+    if (maxUCT == 100) break;
   }
   return selectedChild.select()
 }
