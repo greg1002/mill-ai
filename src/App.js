@@ -41,7 +41,12 @@ class App extends Component {
 
   onStart = () => {
     const gs = new Gamestate("board_standard", this.state.color);
-    let ai = null;
+    let ai = this.ai;
+    if (ai != null) {
+      ai.running = false;
+      this.setState({ai: ai})
+      ai = null;
+    }
     if (this.state.game_type == "single_player") {
       ai = new AI(gs, this.state.color == "B" ? "W" : "B");
       ai.run();

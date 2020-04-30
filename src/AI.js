@@ -8,19 +8,19 @@ export default function AI(gs, color) {
 
 AI.prototype.run = function() {
   var ai = this;
-  this.interval = setInterval(function () {ai.iteration()}, 5);
+  this.interval = setInterval(function () {ai.iterate(30)}, 10);
 }
 
-AI.prototype.iteration = function() {
-  let chosen = this.tree.select().choose().simulate();
-  console.log(this.tree.best_move());
-  console.log(this.tree);
+AI.prototype.iterate = function(n) {
+  if (n <= 0) {
+    console.log(this.tree.best_move());
+    console.log(this.tree);
+    return;
+  }
+  this.tree.select().choose().simulate(50);
+  this.iterate(n-1);
 }
 
 AI.prototype.registerMove = function(move) {
   this.tree.advance(move);
-}
-
-AI.prototype.stop = function() {
-  clearInterval(this.interval);
 }

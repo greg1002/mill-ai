@@ -7,7 +7,7 @@ export default function Node(gs) {
   this.gs = gs;
   this.children = new Map();
   this.simulations = 0;
-  this.wins = {"B": 0, "W": 0};
+  this.score = {"B": 0, "W": 0};
   this.parent = null;
 }
 
@@ -34,7 +34,8 @@ Node.prototype.expand = function(move) {
 
 // Chooses a random node from this nodes children
 Node.prototype.choose = function() {
-  return this.get_child(this.gs.random_move());
+  if (this.gs.possible_moves.length == 0) return this;
+  else return this.get_child(this.gs.random_move());
 }
 
 Node.prototype.advance = function(move) {
@@ -42,27 +43,31 @@ Node.prototype.advance = function(move) {
   this.gs = child.gs;
   this.children = child.children;
   this.simulations = child.simulations;
-  this.wins = child.wins;
+  this.score = child.score;
   this.parent = null;
 }
 
 /* Plays out a game randomly from the current gamestate of this node. Returns
   true if ai wins, else false */
-Node.prototype.simulate = function() {
+Node.prototype.simulate = function(n) {
   let gs = this.gs.clone();
-  while (gs.winner == null) {
+  let i = 0;
+  while (i < n) {
+    if (gs.winner != null) break;
     gs.move(gs.random_move());
+    i++;
   }
-  this.backpropogate(gs.winner);
+  this.backpropogate(gs.score());
 }
 
+/* Returns the best move for player whose turn it is on this node's gamestate */
 Node.prototype.best_move = function() {
   let max_winrate = 0;
   let best_move = null;
   for (let i = 0; i < this.gs.possible_moves.length; i++) {
     let move = this.gs.possible_moves[i];
     let child = this.get_child(move);
-    let winrate = child.wins[child.gs.turn] / child.simulations;
+    let winrate = child.score[this.gs.turn] / child.simulations;
     if (winrate > max_winrate) {
       best_move = move;
       max_winrate = winrate;
@@ -71,11 +76,12 @@ Node.prototype.best_move = function() {
   return best_move
 }
 
-/* Backpropogates the value of [b] from this node */
-Node.prototype.backpropogate = function(w) {
+/* Backpropogates the value of [s] from this node */
+Node.prototype.backpropogate = function(s) {
   this.simulations++;
-  this.wins[w]++;
-  if (this.parent != null) this.parent.backpropogate(w);
+  this.score["B"] += s["B"];
+  this.score["W"] += s["W"];
+  if (this.parent != null) this.parent.backpropogate(s);
 }
 
 //Returns the upper confidence bound of this node
@@ -86,7 +92,7 @@ Node.prototype.UCT = function() {
   if (this.simulations == 0) {
     return 100;
   }
-  return this.wins[this.gs.turn] / this.simulations + EXPLORATION_PARAMETER * Math.sqrt(Math.log(this.parent.simulations) / this.simulations);
+  return this.score[this.gs.turn] / this.simulations + EXPLORATION_PARAMETER * Math.sqrt(Math.log(this.parent.simulations) / this.simulations);
 }
 
 // Returns true if current node is leaf, else false
@@ -98,9 +104,9 @@ Node.prototype.is_leaf = function() {
    a new Node based on the max UCT among a node's children */
 Node.prototype.select = function() {
   if (this.is_leaf()) return this;
-  let maxUCT = 0;
-  let selectedChild = null;
-  for (let i = 0; i < this.gs.possible_moves.length; i++) {
+  let selectedChild = this.get_child(this.gs.possible_moves[0]);
+  let maxUCT = selectedChild.UCT();
+  for (let i = 1; i < this.gs.possible_moves.length; i++) {
     let move = this.gs.possible_moves[i];
     let child = this.get_child(move);
     let uct = child.UCT();

@@ -10,23 +10,45 @@ export default function Gamestate(board_type, turn) {
   this.move_count = 1;
   //Board type
   this.board_type = board_type;
-  //Array representing the game board
-  // For each tile on the board, "B" represents a black piece,
-  // "W" a white piece, "E" an empty spot, and null no spot at all
+  /* Array representing the game board
+     For each tile on the board, "B" represents a black piece,
+     "W" a white piece, "E" an empty spot, and null no spot at all */
   this.board = board_layouts[this.board_type].init;
+  // Temporary placeholder for selected tile after 'move_from' command
   this.selected = null;
+  // List of all possible moves from posititon
   this.possible_moves = [];
+  // Tuple representing the pieces in game for black and white
   this.pieces = {"B": 0, "W": 0};
   this.winner = null;
 
   this.get_possible_moves();
 }
 
+/* Returns a random valid move for this gamestate */
 Gamestate.prototype.random_move = function() {
   return this.possible_moves[Math.floor(Math.random()*this.possible_moves.length)];
 }
 
-// Clones this game state
+/* Returns the score in [0,1] representing standing for both players
+  1 if win, 0 if loss, or some value on (0,1) based on material
+*/
+Gamestate.prototype.score = function() {
+  let sum = this.pieces["B"] + this.pieces["W"];
+  let score =
+    this.winner == "B" ? 1 :
+    this.winner == "W" ? 0 :
+    // Temporary formula
+    (this.pieces["B"] - this.pieces["W"])
+  return {"B": score, "W": 1 - score}
+}
+
+/* Returns true if the placing phase has passed, else false */
+Gamestate.prototype.second_phase = function() {
+  return this.move_count > board_layouts[this.board_type].pieces * 2
+}
+
+/* Clones this game state */
 Gamestate.prototype.clone = function() {
   let clone = new Gamestate(this.board_type, this.turn);
   clone.action = this.action;
@@ -90,12 +112,10 @@ Gamestate.prototype.move = function(command) {
     //makes adjustments to state based on move
     if (is_new_mill) {
       this.action = "take";
-      this.possible_moves = this.get_possible_moves();
-    }
-    if (!is_new_mill || this.possible_moves.length == 0) {
+    } else {
       this.turn = this.turn == "W" ? "B" : "W";
       this.move_count += 1;
-      if (this.move_count > board_info.pieces * 2) {
+      if (this.second_phase()) {
         this.action = "move_from";
       }
     }
@@ -109,9 +129,10 @@ Gamestate.prototype.move = function(command) {
     this.pieces[opp] -= 1;
 
     //makes adjustments to state based on move
-    if (this.move_count > board_info.pieces * 2) {
+    if (this.second_phase()) {
       if (this.pieces[opp] < 3) {
         this.winner = this.turn;
+        return this;
       }
       this.action = "move_from";
     } else {
@@ -119,13 +140,9 @@ Gamestate.prototype.move = function(command) {
     }
     this.turn = opp;
   }
-  this.possible_moves = this.get_possible_moves();
+  this.get_possible_moves();
   if (this.possible_moves.length == 0) {
-    if (this.action == "take") {
-      this.winner = this.turn
-    } else {
       this.winner = this.turn == "W" ? "B" : "W";
-    }
   }
   return this;
 }
@@ -143,6 +160,7 @@ Gamestate.prototype.get_possible_moves = function () {
         possible_moves.push({x: loc.x, y: loc.y});
       }
     });
+    this.possible_moves = possible_moves;
     return possible_moves;
   }
   for (let x = 0; x < board.length; x++) {
@@ -155,12 +173,13 @@ Gamestate.prototype.get_possible_moves = function () {
         //Checks if origin is of player int turn's color
         if (board[x][y] == this.turn) {
           //Checks for each adjacency wheter destination is empty
-          board_info.adjecencies[x][y].forEach(loc => {
+          let adjecencies = board_info.adjecencies[x][y];
+          for (let i = 0; i < adjecencies.length; i++) {
+            let loc = adjecencies[i];
             if (board[loc.x][loc.y] == "E") {
               possible_moves.push({x: x, y: y});
-              return;
             }
-          });
+          }
         }
       } else if (this.action == "take") {
         //check if tile to take is other player's
