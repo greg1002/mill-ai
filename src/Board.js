@@ -15,6 +15,7 @@ export default class Board extends Component {
   }
 
   tileIsActive = (x, y) => {
+    if (!this.props.player_turn) return false;
     let isActive = false;
     this.props.gs.possible_moves.forEach(item => {
       if (x == item.x && y == item.y) {
@@ -27,18 +28,21 @@ export default class Board extends Component {
 
   getPieces = () => {
     const {gs} = this.props;
+    const {player_turn} = this.props;
     let i = -1;
     return (
         gs.board.map((column,x) => {
         return (column.map((tile, y) => {
           i++;
           let possibleMove = false;
-          gs.possible_moves.forEach(move => {
-            if (move.x == x && move.y == y) {
-              possibleMove = true;
-              return;
-            }
-          })
+          if (player_turn) {
+            gs.possible_moves.forEach(move => {
+              if (move.x == x && move.y == y) {
+                possibleMove = true;
+                return;
+              }
+            });
+          }
           if (tile != null) {
           return (
               <Space

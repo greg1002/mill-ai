@@ -13,7 +13,7 @@ export default function Gamestate(board_type, turn) {
   /* Array representing the game board
      For each tile on the board, "B" represents a black piece,
      "W" a white piece, "E" an empty spot, and null no spot at all */
-  this.board = board_layouts[this.board_type].init;
+  this.board = JSON.parse(JSON.stringify(board_layouts[this.board_type].init));
   // Temporary placeholder for selected tile after 'move_from' command
   this.selected = null;
   // List of all possible moves from posititon
@@ -34,12 +34,13 @@ Gamestate.prototype.random_move = function() {
   1 if win, 0 if loss, or some value on (0,1) based on material
 */
 Gamestate.prototype.score = function() {
-  let sum = this.pieces["B"] + this.pieces["W"];
+  let diff = Math.abs(this.pieces["B"] - this.pieces["W"]);
   let score =
     this.winner == "B" ? 1 :
     this.winner == "W" ? 0 :
-    // Temporary formula
-    (this.pieces["B"] - this.pieces["W"])
+    // Temporary formula TODO
+    this.pieces["B"] > this.pieces["W"] ? (diff + 1) / (diff + 2) :
+    1 / (diff + 2);
   return {"B": score, "W": 1 - score}
 }
 

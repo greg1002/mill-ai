@@ -15,14 +15,10 @@ Node.prototype.toPrimitive = function(move) {
   return move.x * 100 + move.y
 }
 
+/* Returns the child of this node bound to [move]. Creates a new node if
+  the child bound to [move] doesn't exist yet
+*/
 Node.prototype.get_child = function(move) {
-  let child = this.children.get(this.toPrimitive(move));
-  if (child == null) return this.expand(move);
-  else return child;
-}
-
-// Expands the tree from this node by [d] layers
-Node.prototype.expand = function(move) {
   let child = this.children.get(this.toPrimitive(move));
   if (child == null) {
     child = new Node(this.gs.clone().move(move));
@@ -32,12 +28,13 @@ Node.prototype.expand = function(move) {
   return child;
 }
 
-// Chooses a random node from this nodes children
-Node.prototype.choose = function() {
+// Expands the tree from this node randomly
+Node.prototype.expand = function() {
   if (this.gs.possible_moves.length == 0) return this;
   else return this.get_child(this.gs.random_move());
 }
 
+// Advances the tree by a move
 Node.prototype.advance = function(move) {
   let child = this.get_child(move);
   this.gs = child.gs;

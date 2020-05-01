@@ -16,19 +16,32 @@ const color = [
 
 
 class App extends Component {
-
   state = {
     gs: new Gamestate("board_standard", "W"),
     ai: null,
+    ai_interval: null,
     game_type: "multi_player",
-    color: "W"
+    color: "W",
+    think_time: 5
   }
 
   makeMove = (x, y) => {
     let newState = this.state.gs.move({x: x, y: y});
     let ai = this.state.ai;
-    if (ai != null) ai.registerMove({x: x, y: y});
-    this.setState({gs: newState, ai: ai});
+    if (ai != null) ai.register_move({x: x, y: y});
+    this.setState({gs: newState, ai: ai}, this.checkAIMove());
+  }
+
+  checkAIMove = () => {
+    if (this.state.gs.winner != null) clearInterval(this.state.ai_interval)
+    if (!this.player_turn()) {
+      let timeout = this.state.think_time * 1000;
+      if (this.state.gs.action === "move_to") timeout = 0;
+      setTimeout(() => {
+        let move = this.state.ai.best_move();
+        this.makeMove(move.x,move.y);
+      }, timeout)
+    }
   }
 
   onGameTypeToggle = (game_type) => {
@@ -39,19 +52,26 @@ class App extends Component {
     this.setState({color: color});
   }
 
+  player_turn = () => {
+    return this.state.ai != null ?
+      this.state.ai.color != this.state.gs.turn : true;
+  }
+
   onStart = () => {
-    const gs = new Gamestate("board_standard", this.state.color);
-    let ai = this.ai;
-    if (ai != null) {
-      ai.running = false;
-      this.setState({ai: ai})
-      ai = null;
-    }
+    let gs = new Gamestate("board_standard", "W");
+    let ai = null;
+    let ai_interval = null;
+    clearInterval(this.state.ai_interval);
     if (this.state.game_type == "single_player") {
       ai = new AI(gs, this.state.color == "B" ? "W" : "B");
-      ai.run();
     }
-    this.setState({gs: gs, ai: ai});
+    this.setState({gs, ai, ai_interval}, () => {
+      if (ai != null) {
+        let ai_interval = setInterval(function () {ai.iterate(30)}, 10);
+        this.setState({ai_interval});
+        this.checkAIMove()
+      };
+    });
   }
 
   getInfoText = () => {
@@ -78,6 +98,7 @@ class App extends Component {
         <Board
           gs={this.state.gs}
           makeMove={this.makeMove}
+          player_turn={this.player_turn()}
         />
         <div className="text"><h2>{this.getInfoText()}</h2></div>
        <div className="menu">
