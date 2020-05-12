@@ -45,11 +45,11 @@ class App extends Component {
   }
 
   onGameTypeToggle = (game_type) => {
-    this.setState({game_type: game_type});
+    this.setState({game_type});
   }
 
   onColorToggle = (color) => {
-    this.setState({color: color});
+    this.setState({color});
   }
 
   player_turn = () => {
