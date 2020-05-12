@@ -8,7 +8,7 @@ export default function AI(gs, color) {
 
 AI.prototype.run = function() {
   var ai = this;
-  this.interval = setInterval(function () {ai.iterate(10)}, 10);
+  this.interval = setInterval(function () {ai.iterate(10)}, 100);
 }
 
 AI.prototype.iterate = function(n) {

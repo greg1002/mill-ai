@@ -25,3 +25,6 @@ img {
   height: 44px;
   border-radius: 50%;
 }
+.bar {
+  position: absolute;
+}

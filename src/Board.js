@@ -3,6 +3,7 @@ import board_standard from './images/board_standard.png';
 import './style/game.css';
 import ReactCursorPosition, { INTERACTIONS } from 'react-cursor-position';
 import Gamestate from './Gamestate.js';
+import _ from 'lodash';
 
 const WHITE_COLOR = '#F1E9C9';
 const BLACK_COLOR = '#404040';
@@ -66,9 +67,63 @@ export default class Board extends Component {
       <div className="game">
         <div className="board">
           <img src={board_standard} />
+        <Bars mills = {this.props.gs.mills}/>
           {this.getPieces()}
         </div>
       </div>
+    )
+  }
+}
+
+class Bars extends Component {
+  state = {
+    animation_interval: null,
+    animation_progression: 0,
+    mills: []
+  }
+
+  componentDidUpdate = (prev_props) => {
+    if (this.props.mills["B"].length + this.props.mills["W"].length != this.state.mills.length) {
+      var mills = [];
+      this.props.mills["B"].forEach(mill => {
+        mills.push({mill: mill, color: BLACK_COLOR});
+      });
+      this.props.mills["W"].forEach(mill => {
+        mills.push({mill: mill, color: WHITE_COLOR});
+      });
+
+      this.setState({mills});
+    }
+  }
+
+  getBars = () => {
+     return this.state.mills.map((item, i) => {
+        const {mill, color} = item;
+        let min_x = Math.min(mill[0].x,mill[1].x,mill[2].x);
+        let max_x = Math.max(mill[0].x,mill[1].x,mill[2].x);
+        let min_y = Math.min(mill[0].y,mill[1].y,mill[2].y);
+        let max_y = Math.max(mill[0].y,mill[1].y,mill[2].y);
+        return (
+          <div
+            key={i}
+            className="bar"
+            style={{
+              top: 100 * min_y + 95,
+              left: 100 * min_x + 95,
+              width: (max_x - min_x) * 100 + 10,
+              height: (max_y - min_y) * 100 + 10,
+              backgroundColor: color
+            }}
+          />
+        )
+    });
+  }
+
+  render () {
+    return (
+      <React.Fragment>
+        {this.getBars()}
+      </React.Fragment>
     )
   }
 }

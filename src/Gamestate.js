@@ -22,6 +22,8 @@ export default function Gamestate(board_type, turn) {
   this.pieces = {"B": 0, "W": 0};
   this.winner = null;
 
+  this.mills = {"B": [], "W": []};
+
   this.get_possible_moves();
 }
 
@@ -59,6 +61,7 @@ Gamestate.prototype.clone = function() {
   clone.possible_moves = JSON.parse(JSON.stringify(this.possible_moves));
   clone.pieces = Object.assign({},this.pieces);
   clone.winner = this.winner;
+  clone.mills = JSON.parse(JSON.stringify(this.mills));
   return clone;
 }
 
@@ -105,8 +108,8 @@ Gamestate.prototype.move = function(command) {
         }
       });
       if (is_in_mill && new_piece_in_mill) {
+        this.mills[this.turn].push(mill);
         is_new_mill = true;
-        break;
       }
     }
 
@@ -123,6 +126,15 @@ Gamestate.prototype.move = function(command) {
   } else if (this.action == "move_from") {
     this.selected = command;
     this.action = "move_to";
+    for (let i = 0; i < this.mills[this.turn].length; i++) {
+      this.mills[this.turn][i].forEach(loc => {
+        if (_.isEqual(loc, command)) {
+          this.mills[this.turn].splice(i);
+          i--;
+          return;
+        }
+      });
+    }
   } else if (this.action == "take") {
     //evaluates command and constructs new state
     this.board[command.x][command.y] = "E";
@@ -189,22 +201,14 @@ Gamestate.prototype.get_possible_moves = function () {
 
         //checks if tile to take is in mill
         let is_in_mill = false;
-        for (let i = 0; i < board_info.mills.length; i++) {
-          const mill = board_info.mills[i];
-          let is_mill = true;
-          let xy_in_this_mill = false;
-          mill.forEach(loc => {
-            if (board[loc.x][loc.y] != opposite) {
-              is_mill = false;
+        for (let i = 0; i < this.mills[opposite].length; i++) {
+          this.mills[opposite][i].forEach(loc => {
+            if (loc.x == x && loc.y == y) {
+              is_in_mill = true;
               return;
             }
-            if (x == loc.x && y == loc.y) {
-              xy_in_this_mill = true;
-            }
           });
-          if (is_mill && xy_in_this_mill) {
-            is_in_mill = true;
-          }
+          if (is_in_mill) break;
         }
 
         //If tile is not in opposing mill, then taking it is possible

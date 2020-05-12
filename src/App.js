@@ -76,13 +76,14 @@ class App extends Component {
 
   getInfoText = () => {
     const {gs, ai, game_type} = this.state;
+    var color = gs.winner != null ? gs.winner : gs.turn;
     return (
       <h2 style={{
-          color: gs.turn == "B" ? 'black' : 'white'
+          color: color == "B" ? 'black' : 'white'
       }}>{
         (ai == null ?
-        (gs.turn == "B" ? "black" : "white") :
-        gs.turn == ai.color ? "ai" : "player") +
+        (color == "B" ? "black" : "white") :
+        color == ai.color ? "ai" : "player") +
         (gs.winner == "B" ? " wins!" :
         gs.winner == "W" ? " wins!" :
         (" to " + (gs.action == "place" ? "place" :
