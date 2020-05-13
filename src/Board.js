@@ -30,6 +30,7 @@ export default class Board extends Component {
   getPieces = () => {
     const {gs} = this.props;
     const {player_turn} = this.props;
+    var last_moves = gs.last_moves();
     let i = -1;
     return (
         gs.board.map((column,x) => {
@@ -44,14 +45,26 @@ export default class Board extends Component {
               }
             });
           }
+          let animation_type = null;
+          last_moves.forEach(move => {
+            if (move.command.x == x && move.command.y == y) {
+              if (move.action === "move_from" || move.action === "take")
+                animation_type = "exit";
+              else animation_type = "enter";
+              return;
+            }
+          });
           if (tile != null) {
-          return (
-              <Space
-              x={x} y={y} type={tile} key={i}
-              possibleMove={possibleMove}
-              action={gs.action}
-              makeMoveOnClick={this.makeMoveOnClick}
-              />);
+            return (
+                <Space
+                x={x} y={y} type={tile} key={i}
+                possibleMove={possibleMove}
+                action={gs.action}
+                makeMoveOnClick={this.makeMoveOnClick}
+                animation_type={animation_type}
+                animation_progression={this.props.animation_progression}
+                />
+            );
           } else return
         }));
       })
@@ -132,41 +145,39 @@ class Space extends Component {
 
 
   state = {
-    animation_interval: null,
-    animation_progression: 1,
     color: 'white'
   }
 
+  getColor = (type) => {
+    return type == "B" ? BLACK_COLOR :
+                 type == "W" ? WHITE_COLOR : 'white';
+  }
+
   componentDidUpdate = (prev_props) => {
-    if (prev_props.type != this.props.type) {
-      if (prev_props.type === "E") {
-        var color = this.props.type == "B" ? BLACK_COLOR :
-                     WHITE_COLOR;
-        this.setState({color});
-        this.startAnimation(true);
-      } else {
-        this.startAnimation(false);
-      }
+    if (prev_props.type === "E" && this.props.type !== "E") {
+      var color = this.props.type == "B" ? BLACK_COLOR :
+                   WHITE_COLOR;
+      this.setState({color});
+    }
+    if (this.props.animation_progression == 1 &&
+      this.getColor(this.props.type) != this.state.color) {
+      var color = this.props.type == "B" ? BLACK_COLOR :
+                   this.props.type == "W" ? WHITE_COLOR : 'white';
+      this.setState({color});
     }
   }
 
-  startAnimation = (forward) => {
-    this.setState({animation_progression: forward ? 0 : 1});
-    var animation_interval = setInterval(() => this.animate(forward), 10);
-    this.setState({animation_interval});
-  }
-
-  animate = (forward) => {
-    let animation_progression = this.state.animation_progression +
-      (forward ? .05 : -.05)
-    if (animation_progression > 1) {
-      this.setState({animation_progression: 1})
-      clearInterval(this.state.animation_interval);
-    } else if (animation_progression < 0) {
-      this.setState({animation_progression: 0});
-      clearInterval(this.state.animation_interval);
-    } else {
-      this.setState({animation_progression});
+  getDimensions = () => {
+    var {animation_type, animation_progression} = this.props;
+    var size = animation_type === "enter" ? animation_progression :
+               animation_type === "exit" ? 1 - animation_progression : 1;
+    return {
+      top: 100 * this.props.y + 80 +
+      ((1 - size) * 20),
+      left: 100 * this.props.x + 80 +
+      ((1 - size) * 20),
+      width: size * 40,
+      height: size * 40
     }
   }
 
@@ -193,15 +204,9 @@ class Space extends Component {
               backgroundColor: 'white'
             }}/>
         <div className="piece"
-          style={{
-              top: 100 * this.props.y + 80 +
-              ((1 - this.state.animation_progression) * 20),
-              left: 100 * this.props.x + 80 +
-              ((1 - this.state.animation_progression) * 20),
-              width: this.state.animation_progression * 40,
-              height: this.state.animation_progression * 40,
+          style={{...this.getDimensions(), ...{
               backgroundColor: this.state.color
-            }}/>
+            }}}/>
       </ReactCursorPosition>
     )
   }

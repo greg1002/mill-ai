@@ -14,26 +14,56 @@ const color = [
   {innerHTML: "White", id: "W"}
 ]
 
+const ANIMATION_LENGTH = 200;
+
 
 class App extends Component {
   state = {
     gs: new Gamestate("board_standard", "W"),
     ai: null,
+    animation_progression: 1,
     ai_interval: null,
     game_type: "multi_player",
     color: "W",
     think_time: 5
   }
 
+  runAI = () => {
+    let ai_interval = setInterval(() => this.state.ai.iterate(30), 10);
+    this.setState({ai_interval});
+  }
+
+  stopAI = () => {
+    clearInterval(this.state.ai_interval);
+  }
+
   makeMove = (x, y) => {
     let newState = this.state.gs.move({x: x, y: y});
     let ai = this.state.ai;
     if (ai != null) ai.register_move({x: x, y: y});
-    this.setState({gs: newState, ai: ai}, this.checkAIMove());
+    this.setState({gs: newState, ai: ai},
+      this.doMoveAnimation(),
+      this.checkAIMove()
+    );
+  }
+
+  doMoveAnimation = () => {
+    this.setState({animation_progression: 0});
+    if (this.state.ai != null) this.stopAI();
+    let animation_interval = setInterval(() => {
+      this.setState({animation_progression:
+        this.state.animation_progression + 10 / ANIMATION_LENGTH
+      });
+    }, 10);
+    setTimeout(() => {
+      clearInterval(animation_interval);
+      this.setState({animation_progression: 1});
+      if (this.state.ai != null) this.runAI();
+    }, ANIMATION_LENGTH);
   }
 
   checkAIMove = () => {
-    if (this.state.gs.winner != null) clearInterval(this.state.ai_interval)
+    if (this.state.gs.winner != null) this.stopAI();
     if (!this.player_turn()) {
       let timeout = this.state.think_time * 1000;
       if (this.state.gs.action === "move_to") timeout = 0;
@@ -67,8 +97,7 @@ class App extends Component {
     }
     this.setState({gs, ai, ai_interval}, () => {
       if (ai != null) {
-        let ai_interval = setInterval(function () {ai.iterate(30)}, 10);
-        this.setState({ai_interval});
+        this.runAI();
         this.checkAIMove()
       };
     });
@@ -100,6 +129,7 @@ class App extends Component {
           gs={this.state.gs}
           makeMove={this.makeMove}
           player_turn={this.player_turn()}
+          animation_progression={this.state.animation_progression}
         />
         <div className="text"><h2>{this.getInfoText()}</h2></div>
        <div className="menu">

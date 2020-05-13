@@ -22,6 +22,8 @@ export default function Gamestate(board_type, turn) {
   this.pieces = {"B": 0, "W": 0};
   this.winner = null;
 
+  this.history = [];
+
   this.mills = {"B": [], "W": []};
 
   this.get_possible_moves();
@@ -30,6 +32,17 @@ export default function Gamestate(board_type, turn) {
 /* Returns a random valid move for this gamestate */
 Gamestate.prototype.random_move = function() {
   return this.possible_moves[Math.floor(Math.random()*this.possible_moves.length)];
+}
+
+/* Returns the last move that was made */
+Gamestate.prototype.last_moves = function() {
+  let last_moves = [];
+  if (this.history.length > 0 && this.action !== "move_to") {
+    last_moves.push(this.history[this.history.length - 1]);
+    if (last_moves[0].action === "move_to")
+      last_moves.push(this.history[this.history.length - 2]);
+  }
+  return last_moves;
 }
 
 /* Returns the score in [0,1] representing standing for both players
@@ -62,6 +75,7 @@ Gamestate.prototype.clone = function() {
   clone.pieces = Object.assign({},this.pieces);
   clone.winner = this.winner;
   clone.mills = JSON.parse(JSON.stringify(this.mills));
+  clone.history = JSON.parse(JSON.stringify(this.history));
   return clone;
 }
 
@@ -79,7 +93,7 @@ Gamestate.prototype.move = function(command) {
   }
   if (!valid_command) throw console.error("Invalid Command:", command);
 
-  const last_action = this.action;
+  this.history.push({"action": this.action, "command": command, "color": this.turn})
 
   //evaluates command and constructs new state
   if (this.action == "place" || this.action == "move_to") {
