@@ -176,7 +176,10 @@ Gamestate.prototype.move = function(command) {
 
 // Returns/updates a list of possible moves from this state
 Gamestate.prototype.get_possible_moves = function () {
-  if (this.winner != null) return [];
+  if (this.winner != null) {
+    this.possible_moves = [];
+    return [];
+  }
 
   const possible_moves = [];
   const board = this.board;

@@ -22,6 +22,7 @@ class App extends Component {
     gs: new Gamestate("board_standard", "W"),
     ai: null,
     animation_progression: 1,
+    is_animating: false,
     ai_interval: null,
     game_type: "multi_player",
     color: "W",
@@ -48,7 +49,7 @@ class App extends Component {
   }
 
   doMoveAnimation = () => {
-    this.setState({animation_progression: 0});
+    this.setState({animation_progression: 0, is_animating: true});
     if (this.state.ai != null) this.stopAI();
     let animation_interval = setInterval(() => {
       this.setState({animation_progression:
@@ -57,7 +58,7 @@ class App extends Component {
     }, 10);
     setTimeout(() => {
       clearInterval(animation_interval);
-      this.setState({animation_progression: 1});
+      this.setState({animation_progression: 1, is_animating: false});
       if (this.state.ai != null) this.runAI();
     }, ANIMATION_LENGTH);
   }
@@ -68,6 +69,7 @@ class App extends Component {
       let timeout = this.state.think_time * 1000;
       if (this.state.gs.action === "move_to") timeout = 0;
       setTimeout(() => {
+        if (this.state.ai == null) return;
         let move = this.state.ai.best_move();
         this.makeMove(move.x,move.y);
       }, timeout)
@@ -130,6 +132,7 @@ class App extends Component {
           makeMove={this.makeMove}
           player_turn={this.player_turn()}
           animation_progression={this.state.animation_progression}
+          is_animating={this.state.is_animating}
         />
         <div className="text"><h2>{this.getInfoText()}</h2></div>
        <div className="menu">
