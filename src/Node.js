@@ -1,5 +1,3 @@
-import Gamestate from './Gamestate.js';
-import _ from 'lodash';
 
 const EXPLORATION_PARAMETER = Math.sqrt(2);
 
@@ -30,7 +28,7 @@ Node.prototype.get_child = function(move) {
 
 // Expands the tree from this node randomly
 Node.prototype.expand = function() {
-  if (this.gs.possible_moves.length == 0) return this;
+  if (this.gs.possible_moves.length === 0) return this;
   else return this.get_child(this.gs.random_move());
 }
 
@@ -86,7 +84,7 @@ Node.prototype.UCT = function() {
   if (this.parent == null) {
     return 0;
   }
-  if (this.simulations == 0) {
+  if (this.simulations === 0) {
     return 100;
   }
   return this.score[this.gs.turn] / this.simulations + EXPLORATION_PARAMETER * Math.sqrt(Math.log(this.parent.simulations) / this.simulations);
@@ -94,7 +92,7 @@ Node.prototype.UCT = function() {
 
 // Returns true if current node is leaf, else false
 Node.prototype.is_leaf = function() {
-  return (this.children.size == 0 || this.gs.possible_moves.length == 0);
+  return (this.children.size === 0 || this.gs.possible_moves.length === 0);
 }
 
 /* Travels down the tree until hitting a leaf node and returns it, selecting
@@ -111,7 +109,7 @@ Node.prototype.select = function() {
       selectedChild = child;
       maxUCT = uct;
     }
-    if (maxUCT == 100) break;
+    if (maxUCT === 100) break;
   }
   return selectedChild.select()
 }

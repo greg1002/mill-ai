@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import board_standard from './images/board_standard.png';
 import './style/game.css';
 import ReactCursorPosition, { INTERACTIONS } from 'react-cursor-position';
-import Gamestate from './Gamestate.js';
-import _ from 'lodash';
 
 const WHITE_COLOR = '#F1E9C9';
 const BLACK_COLOR = '#404040';
@@ -41,9 +39,9 @@ class Bars extends Component {
 
   componentDidUpdate = (prev_props) => {
     const {gs, is_animating} = this.props;
+    if (gs.action === "move_to") return;
 
-    if (this.state.update_lock && prev_props.is_animating != is_animating) {
-      console.log(is_animating);
+    if (this.state.update_lock && prev_props.is_animating !== is_animating) {
       var mills = [];
       if (is_animating) {
         mills = this.state.mills;
@@ -55,7 +53,7 @@ class Bars extends Component {
         mills.push({mill: mill, color: "W"});
       });
       this.setState({mills, update_lock: false});
-    } else if (!this.state.update_lock && prev_props.is_animating == is_animating) {
+    } else if (!this.state.update_lock && prev_props.is_animating === is_animating) {
       this.setState({update_lock: true})
     }
   }
@@ -67,11 +65,11 @@ class Bars extends Component {
         const {mill, color} = item;
         var animation_type = null;
         last_moves.forEach(last_move => {
-          for (i = 0; i < mill.length; i++) {
-            var loc = mill[i];
-            if (last_move.command.x == loc.x && last_move.command.y == loc.y) {
-              animation_type = {"target": i, "type":
-                last_move.action == "take" || last_move.action == "move_from" ?
+          for (let j = 0; j < mill.length; j++) {
+            var loc = mill[j];
+            if (last_move.command.x === loc.x && last_move.command.y === loc.y) {
+              animation_type = {"target": j, "type":
+                last_move.action === "take" || last_move.action === "move_from" ?
                   "exit" : "enter"
               };
               return;
@@ -103,7 +101,7 @@ class Bars extends Component {
 class Bar extends Component {
 
   getColor = (color) => {
-    return color == "B" ? BLACK_COLOR :
+    return color === "B" ? BLACK_COLOR :
         WHITE_COLOR;
   }
 
@@ -119,9 +117,8 @@ class Bar extends Component {
   }
 
   getBarSections = () => {
-    const {animation_type, animation_progression, mill, color} = this.props;
-    if (animation_type == null || animation_type.target != 1) {
-      var dimensions;
+    const {animation_type, animation_progression, mill} = this.props;
+    if (animation_type == null || animation_type.target !== 1) {
       var min_x = Math.min(mill[0].x,mill[2].x);
       var min_y = Math.min(mill[0].y,mill[2].y);
       var max_x = Math.max(mill[0].x,mill[2].x);
@@ -139,8 +136,31 @@ class Bar extends Component {
       }
       return this.getBar(dimensions);
     } else {
-      // TODO
-      return <div />
+      min_x = Math.min(mill[0].x,mill[2].x);
+      min_y = Math.min(mill[0].y,mill[2].y);
+      var mid_x = mill[1].x;
+      var mid_y = mill[1].y;
+      max_x = Math.max(mill[0].x,mill[2].x);
+      max_y = Math.max(mill[0].y,mill[2].y);
+      size = animation_type.type === "enter" ? animation_progression :
+        1 - animation_progression;
+      var dimensions1 = {
+        top: 100 * min_y + 95,
+        left: 100 * min_x + 95,
+        width: ((mid_x - min_x) * 100 * size) + 10,
+        height: ((mid_y - min_y) * 100 * size) + 10
+      }
+      var dimensions2 = {
+        top: 100 * (mid_y + (max_y - mid_y) * (1 - size)) + 95,
+        left: 100 * (mid_x + (max_x - mid_x) * (1 - size)) + 95,
+        width: ((max_x - mid_x) * 100 * size) + 10,
+        height: ((max_y - mid_y) * 100 * size) + 10
+      }
+      return (
+        <React.Fragment>
+          {this.getBar(dimensions1)}{this.getBar(dimensions2)}
+        </React.Fragment>
+      )
     }
   }
 
@@ -162,7 +182,7 @@ class Spaces extends Component {
     if (!this.props.player_turn) return false;
     let isActive = false;
     this.props.gs.possible_moves.forEach(item => {
-      if (x == item.x && y == item.y) {
+      if (x === item.x && y === item.y) {
         isActive = true;
         return;
       }
@@ -181,7 +201,7 @@ class Spaces extends Component {
           let possibleMove = false;
           if (player_turn) {
             gs.possible_moves.forEach(move => {
-              if (move.x == x && move.y == y) {
+              if (move.x === x && move.y === y) {
                 possibleMove = true;
                 return;
               }
@@ -189,7 +209,7 @@ class Spaces extends Component {
           }
           let animation_type = null;
           last_moves.forEach(move => {
-            if (move.command.x == x && move.command.y == y) {
+            if (move.command.x === x && move.command.y === y) {
               if (move.action === "move_from" || move.action === "take")
                 animation_type = "exit";
               else animation_type = "enter";
@@ -226,13 +246,13 @@ class Space extends Component {
   }
 
   getColor = (type) => {
-    return type == "B" ? BLACK_COLOR :
-                 type == "W" ? WHITE_COLOR : 'white';
+    return type === "B" ? BLACK_COLOR :
+                 type === "W" ? WHITE_COLOR : 'white';
   }
 
   componentDidUpdate = (prev_props) => {
     if (prev_props.type === "E" && this.props.type !== "E") {
-      var color = this.props.type == "B" ? BLACK_COLOR :
+      var color = this.props.type === "B" ? BLACK_COLOR :
                    WHITE_COLOR;
       this.setState({color});
     }
@@ -266,7 +286,7 @@ class Space extends Component {
           style ={{
             top: 100 * this.props.y + 78,
             left: 100 * this.props.x + 78,
-            backgroundColor: this.props.action == 'take' ? 'red' : 'black'
+            backgroundColor: this.props.action === 'take' ? 'red' : 'black'
           }}/>
           <div className="piece"
             style={{

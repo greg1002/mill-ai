@@ -68,7 +68,7 @@ const board_layouts = {
       [{x: 5, y: 5},{x: 3, y: 5},{x: 1, y: 5}],
       [{x: 6, y: 6},{x: 3, y: 6},{x: 0, y: 6}]
     ],
-    pieces: 9
+    pieces: 4
   }
 }
 

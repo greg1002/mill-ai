@@ -86,7 +86,7 @@ class App extends Component {
 
   player_turn = () => {
     return this.state.ai != null ?
-      this.state.ai.color != this.state.gs.turn : true;
+      this.state.ai.color !== this.state.gs.turn : true;
   }
 
   onStart = () => {
@@ -94,8 +94,8 @@ class App extends Component {
     let ai = null;
     let ai_interval = null;
     clearInterval(this.state.ai_interval);
-    if (this.state.game_type == "single_player") {
-      ai = new AI(gs, this.state.color == "B" ? "W" : "B");
+    if (this.state.game_type === "single_player") {
+      ai = new AI(gs, this.state.color === "B" ? "W" : "B");
     }
     this.setState({gs, ai, ai_interval}, () => {
       if (ai != null) {
@@ -106,19 +106,19 @@ class App extends Component {
   }
 
   getInfoText = () => {
-    const {gs, ai, game_type} = this.state;
+    const {gs, ai} = this.state;
     var color = gs.winner != null ? gs.winner : gs.turn;
     return (
       <h2 style={{
-          color: color == "B" ? 'black' : 'white'
+          color: color === "B" ? 'black' : 'white'
       }}>{
         (ai == null ?
-        (color == "B" ? "black" : "white") :
-        color == ai.color ? "ai" : "player") +
-        (gs.winner == "B" ? " wins!" :
-        gs.winner == "W" ? " wins!" :
-        (" to " + (gs.action == "place" ? "place" :
-          gs.action == "take" ? "take" : "move")))
+        (color === "B" ? "black" : "white") :
+        color === ai.color ? "ai" : "player") +
+        (gs.winner === "B" ? " wins!" :
+        gs.winner === "W" ? " wins!" :
+        (" to " + (gs.action === "place" ? "place" :
+          gs.action === "take" ? "take" : "move")))
       }</h2>
     )
   }

@@ -7,7 +7,7 @@ export default function Gamestate(board_type, turn) {
   //Action to do
   this.action = "place";
   //Moves since the beginning of the game
-  this.move_count = 1;
+  this.place_count = 1;
   //Board type
   this.board_type = board_type;
   /* Array representing the game board
@@ -44,6 +44,11 @@ Gamestate.prototype.last_moves = function() {
   }
   return last_moves;
 }
+/* Sets the winner of the game to [color]*/
+Gamestate.prototype.setWinner = function (color) {
+  this.winner = color;
+  this.possible_moves = [];
+}
 
 /* Returns the score in [0,1] representing standing for both players
   1 if win, 0 if loss, or some value on (0,1) based on material
@@ -51,8 +56,8 @@ Gamestate.prototype.last_moves = function() {
 Gamestate.prototype.score = function() {
   let diff = Math.abs(this.pieces["B"] - this.pieces["W"]);
   let score =
-    this.winner == "B" ? 1 :
-    this.winner == "W" ? 0 :
+    this.winner === "B" ? 1 :
+    this.winner === "W" ? 0 :
     // Temporary formula TODO
     this.pieces["B"] > this.pieces["W"] ? (diff + 1) / (diff + 2) :
     1 / (diff + 2);
@@ -61,14 +66,14 @@ Gamestate.prototype.score = function() {
 
 /* Returns true if the placing phase has passed, else false */
 Gamestate.prototype.second_phase = function() {
-  return this.move_count > board_layouts[this.board_type].pieces * 2
+  return this.place_count > board_layouts[this.board_type].pieces * 2
 }
 
 /* Clones this game state */
 Gamestate.prototype.clone = function() {
   let clone = new Gamestate(this.board_type, this.turn);
   clone.action = this.action;
-  clone.move_count = this.move_count;
+  clone.place_count = this.place_count;
   clone.board = JSON.parse(JSON.stringify(this.board));
   clone.selected = Object.assign({},this.selected);
   clone.possible_moves = JSON.parse(JSON.stringify(this.possible_moves));
@@ -96,13 +101,14 @@ Gamestate.prototype.move = function(command) {
   this.history.push({"action": this.action, "command": command, "color": this.turn})
 
   //evaluates command and constructs new state
-  if (this.action == "place" || this.action == "move_to") {
+  if (this.action === "place" || this.action === "move_to") {
     this.board[command.x][command.y] = this.turn;
 
-    if (this.action == "move_to") {
+    if (this.action === "move_to") {
       this.board[this.selected.x][this.selected.y] = "E";
       this.selected = null;
     } else {
+      this.place_count++;
       this.pieces[this.turn] += 1;
     }
 
@@ -114,7 +120,7 @@ Gamestate.prototype.move = function(command) {
       let new_piece_in_mill = false;
       let is_in_mill = true;
       mill.forEach(loc => {
-        if (this.board[loc.x][loc.y] != this.turn) {
+        if (this.board[loc.x][loc.y] !== this.turn) {
           is_in_mill = false;
         }
         if (_.isEqual(loc, command)) {
@@ -131,13 +137,12 @@ Gamestate.prototype.move = function(command) {
     if (is_new_mill) {
       this.action = "take";
     } else {
-      this.turn = this.turn == "W" ? "B" : "W";
-      this.move_count += 1;
+      this.turn = this.turn === "W" ? "B" : "W";
       if (this.second_phase()) {
         this.action = "move_from";
       }
     }
-  } else if (this.action == "move_from") {
+  } else if (this.action === "move_from") {
     this.selected = command;
     this.action = "move_to";
     for (let i = 0; i < this.mills[this.turn].length; i++) {
@@ -149,16 +154,16 @@ Gamestate.prototype.move = function(command) {
         }
       });
     }
-  } else if (this.action == "take") {
+  } else if (this.action === "take") {
     //evaluates command and constructs new state
     this.board[command.x][command.y] = "E";
-    const opp = this.turn == "W" ? "B" : "W";
+    const opp = this.turn === "W" ? "B" : "W";
     this.pieces[opp] -= 1;
 
     //makes adjustments to state based on move
     if (this.second_phase()) {
       if (this.pieces[opp] < 3) {
-        this.winner = this.turn;
+        this.setWinner(this.turn);
         return this;
       }
       this.action = "move_from";
@@ -168,8 +173,8 @@ Gamestate.prototype.move = function(command) {
     this.turn = opp;
   }
   this.get_possible_moves();
-  if (this.possible_moves.length == 0) {
-      this.winner = this.turn == "W" ? "B" : "W";
+  if (this.possible_moves.length === 0) {
+      this.setWinner(this.turn === "W" ? "B" : "W");
   }
   return this;
 }
@@ -184,9 +189,9 @@ Gamestate.prototype.get_possible_moves = function () {
   const possible_moves = [];
   const board = this.board;
   const board_info = board_layouts[this.board_type];
-  if (this.action == "move_to") {
+  if (this.action === "move_to") {
     board_info.adjecencies[this.selected.x][this.selected.y].forEach(loc => {
-      if (board[loc.x][loc.y] == "E") {
+      if (board[loc.x][loc.y] === "E") {
         possible_moves.push({x: loc.x, y: loc.y});
       }
     });
@@ -195,32 +200,32 @@ Gamestate.prototype.get_possible_moves = function () {
   }
   for (let x = 0; x < board.length; x++) {
     for (let y = 0; y < board[x].length; y++) {
-      if (this.action == "place") {
-        if (board[x][y] == "E") {
+      if (this.action === "place") {
+        if (board[x][y] === "E") {
           possible_moves.push({x: x, y: y});
         }
-      } else if (this.action == "move_from") {
+      } else if (this.action === "move_from") {
         //Checks if origin is of player int turn's color
-        if (board[x][y] == this.turn) {
+        if (board[x][y] === this.turn) {
           //Checks for each adjacency wheter destination is empty
           let adjecencies = board_info.adjecencies[x][y];
           for (let i = 0; i < adjecencies.length; i++) {
             let loc = adjecencies[i];
-            if (board[loc.x][loc.y] == "E") {
+            if (board[loc.x][loc.y] === "E") {
               possible_moves.push({x: x, y: y});
             }
           }
         }
-      } else if (this.action == "take") {
+      } else if (this.action === "take") {
         //check if tile to take is other player's
-        const opposite = this.turn == "W" ? "B" : "W";
-        if (board[x][y] != opposite) continue;
+        const opposite = this.turn === "W" ? "B" : "W";
+        if (board[x][y] !== opposite) continue;
 
         //checks if tile to take is in mill
         let is_in_mill = false;
         for (let i = 0; i < this.mills[opposite].length; i++) {
           this.mills[opposite][i].forEach(loc => {
-            if (loc.x == x && loc.y == y) {
+            if (loc.x === x && loc.y === y) {
               is_in_mill = true;
               return;
             }
@@ -233,8 +238,7 @@ Gamestate.prototype.get_possible_moves = function () {
           possible_moves.push({x: x, y: y});
         }
       } else {
-        throw "Gamestate.action must be 'place', 'move_to', 'move_from', or 'take'";
-        break;
+        throw new Error("Gamestate.action must be 'place', 'move_to', 'move_from', or 'take'");
       }
     }
   }
