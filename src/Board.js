@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import board_standard from './images/board_standard.png';
+import board_layouts from './Layouts.js';
 import './style/game.css';
 import ReactCursorPosition, { INTERACTIONS } from 'react-cursor-position';
 
@@ -9,20 +9,22 @@ const BLACK_COLOR = '#404040';
 export default class Board extends Component {
 
   render() {
+    const {gs, animation_progression, is_animating, makeMove, player_turn} = this.props;
+    const board_layout = board_layouts[gs.board_type];
     return (
       <div className="game">
-        <div className="board">
-          <img src={board_standard} />
+        <div className="board" style={{width: (board_layout.x + 1) * 100, height: (board_layout.y + 1) * 100}}>
+          <img src={board_layout.image} />
           <Bars
-            gs={this.props.gs}
-            animation_progression={this.props.animation_progression}
-            is_animating={this.props.is_animating}
+            gs={gs}
+            animation_progression={animation_progression}
+            is_animating={is_animating}
           />
           <Spaces
-            gs={this.props.gs}
-            player_turn={this.props.player_turn}
-            animation_progression={this.props.animation_progression}
-            makeMove={this.props.makeMove}
+            gs={gs}
+            player_turn={player_turn}
+            animation_progression={animation_progression}
+            makeMove={makeMove}
           />
         </div>
       </div>
