@@ -6,15 +6,9 @@ export default function AI(gs, color) {
   this.color = color;
 }
 
-AI.prototype.run = function() {
-  var ai = this;
-  this.interval = setInterval(function () {ai.iterate(10)}, 100);
-}
-
 AI.prototype.iterate = function(n) {
   if (n <= 0) {
     console.log(this.tree.best_move());
-    console.log(this.tree);
     return;
   }
   this.tree.select().expand().simulate(50);

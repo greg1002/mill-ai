@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import board_layouts from './Layouts.js';
-import './style/game.css';
+import './style/app.css';
 import ReactCursorPosition, { INTERACTIONS } from 'react-cursor-position';
 
-const WHITE_COLOR = '#F1E9C9';
-const BLACK_COLOR = '#404040';
+const SCALE = .75;
 
 export default class Board extends Component {
 
@@ -12,8 +11,8 @@ export default class Board extends Component {
     const {gs, animation_progression, is_animating, makeMove, player_turn} = this.props;
     const board_layout = board_layouts[gs.board_type];
     return (
-      <div className="game">
-        <div className="board" style={{width: (board_layout.x + 1) * 100, height: (board_layout.y + 1) * 100}}>
+      <div className="board-backdrop">
+        <div className="board" style={{width: (board_layout.x + 1) * 100 * SCALE, height: (board_layout.y + 1) * 100 * SCALE}}>
           <img src={board_layout.image} />
           <Bars
             gs={gs}
@@ -103,17 +102,15 @@ class Bars extends Component {
 class Bar extends Component {
 
   getColor = (color) => {
-    return color === "B" ? BLACK_COLOR :
-        WHITE_COLOR;
+    return color === "B" ? 'black-background' :
+        'white-background';
   }
 
   getBar = (dimensions) => {
     return (
       <div
-        className="bar"
-        style={{...dimensions,...{
-          backgroundColor: this.getColor(this.props.color)
-        }}}
+        className={"bar " + this.getColor(this.props.color)}
+        style={dimensions}
       />
     )
   }
@@ -131,10 +128,10 @@ class Bar extends Component {
          1 - animation_progression;
       }
       var dimensions = {
-        top: 100 * (min_y + (max_y - min_y) * (1 - size) / 2) + 95,
-        left: 100 * (min_x + (max_x - min_x) * (1 - size) / 2) + 95,
-        width: ((max_x - min_x) * 100 * size) + 10,
-        height: ((max_y - min_y) * 100 * size) + 10
+        top: (100 * (min_y + (max_y - min_y) * (1 - size) / 2) + 95) * SCALE,
+        left: (100 * (min_x + (max_x - min_x) * (1 - size) / 2) + 95) * SCALE,
+        width: (((max_x - min_x) * 100 * size) + 10) * SCALE,
+        height: (((max_y - min_y) * 100 * size) + 10) * SCALE
       }
       return this.getBar(dimensions);
     } else {
@@ -147,16 +144,16 @@ class Bar extends Component {
       size = animation_type.type === "enter" ? animation_progression :
         1 - animation_progression;
       var dimensions1 = {
-        top: 100 * min_y + 95,
-        left: 100 * min_x + 95,
-        width: ((mid_x - min_x) * 100 * size) + 10,
-        height: ((mid_y - min_y) * 100 * size) + 10
+        top: (100 * min_y + 95) * SCALE,
+        left: (100 * min_x + 95) * SCALE,
+        width: (((mid_x - min_x) * 100 * size) + 10) * SCALE,
+        height: (((mid_y - min_y) * 100 * size) + 10) * SCALE
       }
       var dimensions2 = {
-        top: 100 * (mid_y + (max_y - mid_y) * (1 - size)) + 95,
-        left: 100 * (mid_x + (max_x - mid_x) * (1 - size)) + 95,
-        width: ((max_x - mid_x) * 100 * size) + 10,
-        height: ((max_y - mid_y) * 100 * size) + 10
+        top: (100 * (mid_y + (max_y - mid_y) * (1 - size)) + 95) * SCALE,
+        left: (100 * (mid_x + (max_x - mid_x) * (1 - size)) + 95) * SCALE,
+        width: (((max_x - mid_x) * 100 * size) + 10) * SCALE,
+        height: (((max_y - mid_y) * 100 * size) + 10) * SCALE
       }
       return (
         <React.Fragment>
@@ -248,15 +245,13 @@ class Space extends Component {
   }
 
   getColor = (type) => {
-    return type === "B" ? BLACK_COLOR :
-                 type === "W" ? WHITE_COLOR : 'white';
+    return type === "B" ? "black-background" :
+                 type === "W" ? "white-background" : '';
   }
 
   componentDidUpdate = (prev_props) => {
     if (prev_props.type === "E" && this.props.type !== "E") {
-      var color = this.props.type === "B" ? BLACK_COLOR :
-                   WHITE_COLOR;
-      this.setState({color});
+      this.setState({color: this.getColor(this.props.type)});
     }
   }
 
@@ -265,12 +260,12 @@ class Space extends Component {
     var size = animation_type === "enter" ? animation_progression :
                animation_type === "exit" ? 1 - animation_progression : 1;
     return {
-      top: 100 * this.props.y + 80 +
-      ((1 - size) * 20),
-      left: 100 * this.props.x + 80 +
-      ((1 - size) * 20),
-      width: size * 40,
-      height: size * 40
+      top: (100 * this.props.y + 80 +
+      ((1 - size) * 20)) * SCALE,
+      left: (100 * this.props.x + 80 +
+      ((1 - size) * 20)) * SCALE,
+      width: size * 40 * SCALE,
+      height: size * 40 * SCALE
     }
   }
 
@@ -284,23 +279,25 @@ class Space extends Component {
         activationInteractionMouse={INTERACTIONS.CLICK}
         onActivationChanged={this.onMouseClick}
       >
-        {this.props.possibleMove ? <><div className="piece-outline"
+        {this.props.possibleMove ? <><div className="piece"
           style ={{
-            top: 100 * this.props.y + 78,
-            left: 100 * this.props.x + 78,
+            top: (100 * this.props.y + 78) * SCALE,
+            left: (100 * this.props.x + 78) * SCALE,
+            width: 44 * SCALE,
+            height: 44 * SCALE,
             backgroundColor: this.props.action === 'take' ? 'red' : 'black'
           }}/>
           <div className="piece"
             style={{
-                top: 100 * this.props.y + 80,
-                left: 100 * this.props.x + 80,
+                top: (100 * this.props.y + 80) * SCALE,
+                left: (100 * this.props.x + 80) * SCALE,
+                width: 40 * SCALE,
+                height: 40 * SCALE,
                 backgroundColor: 'white'
           }}/></> : <div />}
           {this.props.type === "E" && this.props.animation_type == null ? <div /> :
-          <div className="piece"
-          style={{...this.getDimensions(), ...{
-              backgroundColor: this.state.color
-          }}}/>}
+          <div className={"piece " + this.state.color}
+          style={this.getDimensions()}/>}
       </ReactCursorPosition>
     )
   }

@@ -1,15 +1,120 @@
-.menu {
-  display: flex;
-  margin: 0 auto;
-  flex-direction: row;
-  justify-content: center;
+/* Variables */
+:root {
+  --primary-color: #89b886;
+  --secondary-color: #d8f2c9;
+  --navbar-height: 74px;
+  --menu-ratio: 40%;
+  --black-color: #808080;
+  --white-color: #F1E9C9;
 }
-h1 {
+
+
+.main {
+  position: absolute;
+  top: var(--navbar-height);
+  height: calc(100% - var(--navbar-height));
+  width: 100%;
+}
+
+/* Menu */
+.menu {
+  position: absolute;
+  width: var(--menu-ratio);
+  left: 0;
+  top: 0;
+  height: 100%;
+}
+.menu-div {
+  margin: 10px;
+}
+.settings {
+
+}
+.info {
+  top: 50%;
+  position: absolute;
+  width: 100%;
+  border-top: 2px solid Black;
+  height: 50%;
+}
+.bottom {
+  margin: 0;
+  bottom: 0px;
+  width: 100%;
+  position: absolute;
+}
+.progression-bar-outline {
+  border: 2px solid Black;
+  height: 20px;
+}
+.progression-bar {
+  margin: 0;
+  left: 0;
+  height: 100%;
+  background-color: black;
+}
+
+
+/* Navbar */
+.navbar {
+  background-color: var(--primary-color);
+  border-bottom: 2px solid Black;
+}
+
+/* Text Settings*/
+.info-font {
+  font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace;
+  font-weight: bold;
+}
+.main-font {
+  font-family: Verdana,Geneva,sans-serif;
+}
+.var-black {
+  color: var(--black-color);
+}
+.var-white {
+  color: var(--white-color);
+}
+.black {
+  color: black;
+}
+.white {
   color: white;
 }
-h2 {
-  margin-top: -50px;
+
+/* Board */
+.board {
+  margin: 0 auto;
+  position: relative;
 }
-.text {
-  text-align: center;
+
+.board-backdrop {
+  background-color: var(--secondary-color);
+  margin-left: var(--menu-ratio);
+  border-left: 2px solid Black;
+  width: calc(100% - var(--menu-ratio));
+  height: 100%;
+}
+
+img {
+    max-width: 100%;
+    max-height: 100%;
+    position: relative;
+    left: 0;
+    top: 0;
+}
+
+.black-background {
+  background-color: var(--black-color);
+}
+.white-background {
+  background-color: var(--white-color);
+}
+
+.piece {
+  position: absolute;
+  border-radius: 50%;
+}
+.bar {
+  position: absolute;
 }
