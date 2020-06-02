@@ -4,6 +4,9 @@ import AI from './AI.js';
 import './style/app.css';
 import Gamestate from './Gamestate.js';
 
+import { AppBar, Button, Typography, Container, ButtonGroup, Grid, Paper, Card, CardContent, Toolbar} from "@material-ui/core";
+import {spacing} from "@material-ui/system"
+
 const gameTypes = [
   {innerHTML: "Single Player vs AI", id: 'single_player'},
   {innerHTML: "Multiplayer", id: 'multi_player'}
@@ -121,29 +124,38 @@ class App extends Component {
     return (
       <React.Fragment>
         <Nav />
-        <div className="main">
-          <Board
-            gs={this.state.gs}
-            makeMove={this.makeMove}
-            player_turn={this.player_turn()}
-            animation_progression={this.state.animation_progression}
-            is_animating={this.state.is_animating}
-          />
-          <div className="menu">
+        <Container maxWidth="sm">
+          <Grid container direction="column" justify="center" alignItems="center stretch" spacing={3}>
+            {[
+            <Board
+              gs={this.state.gs}
+              makeMove={this.makeMove}
+              player_turn={this.player_turn()}
+              animation_progression={this.state.animation_progression}
+              is_animating={this.state.is_animating}
+            />,
             <Settings
               game_type={this.state.game_type}
               color={this.state.color}
               onGameTypeToggle={this.onGameTypeToggle}
               onColorToggle={this.onColorToggle}
               onStart={this.onStart}
-            />
+            />,
             <Info
               gs={this.state.gs}
               ai={this.state.ai}
               think_progression={this.state.think_progression}
-            />
-          </div>
-        </div>
+            />].map(element => {
+              return (
+                <Grid item xs={12}>
+                  <Card elevation={3} className="fullWidth">
+                    <CardContent>{element}</CardContent>
+                  </Card>
+                </Grid>
+              )
+            })}
+          </Grid>
+        </Container>
       </React.Fragment>
     );
   }
@@ -153,25 +165,25 @@ class Settings extends Component {
 
   render () {
     return (
-      <div className="settings">
-          <div className="btn-group btn-group-toggle m-2">{
+      <div>
+          <ButtonGroup variant="contained" color="primary" aria-label="contained primary button group">{
             gameTypes.map(type => (
-              <label key={type.id} className={type.id === this.props.game_type ? "btn btn-primary active" : "btn btn-primary"}>
-                <input type="radio" id={type.id} autoComplete="off" onClick={() => this.props.onGameTypeToggle(type.id)}/>{type.innerHTML}
-              </label>
+              <Button key={type.id} disabled={type.id === this.props.game_type} onClick={() => this.props.onGameTypeToggle(type.id)}>
+                {type.innerHTML}
+              </Button>
             ))}
-          </div>
+          </ButtonGroup>
           {
             this.props.game_type === "single_player" ?
-            <div className="btn-group btn-group-toggle m-2">{
+            <ButtonGroup variant="contained" color="primary" aria-label="contained primary button group">{
               color.map(type => (
-                <label key={type.id} className={type.id === this.props.color ? "btn btn-primary active" : "btn btn-primary"}>
-                  <input type="radio" id={type.id} autoComplete="off" onClick={() => this.props.onColorToggle(type.id)}/>{type.innerHTML}
-                </label>
+                <Button key={type.id} disabled={type.id === this.props.color} onClick={() => this.props.onColorToggle(type.id)}>
+                  {type.innerHTML}
+                </Button>
               ))}
-            </div> : <div />
+            </ButtonGroup> : <div />
           }
-          <button type="button" className="btn btn-primary" onClick={this.props.onStart}>Start!</button>
+          <Button variant="contained" color="primary" onClick={this.props.onStart}>Start!</Button>
       </div>
     )
   }
@@ -212,7 +224,7 @@ class Info extends Component {
 
   render () {
     return (
-      <div className="info">
+      <div>
         {this.getInfoText()}
         {this.getProgressionBar()}
       </div>
@@ -223,9 +235,11 @@ class Info extends Component {
 class Nav extends Component {
   render () {
     return (
-      <nav className="navbar navbar-light">
-        <h1 className="main-font white">Mill-AI</h1>
-      </nav>
+      <AppBar position="static" style={{"margin-bottom": "16px"}}>
+        <Toolbar style={{"min-height": "48px"}}>
+          <Typography variant="h6" color="inherit">Mill-AI</Typography>
+        </Toolbar>
+      </AppBar>
     )
   }
 }

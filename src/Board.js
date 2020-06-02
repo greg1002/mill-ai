@@ -3,7 +3,7 @@ import board_layouts from './Layouts.js';
 import './style/app.css';
 import ReactCursorPosition, { INTERACTIONS } from 'react-cursor-position';
 
-const SCALE = .75;
+const SCALE = .5;
 
 export default class Board extends Component {
 
