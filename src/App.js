@@ -4,7 +4,7 @@ import AI from './AI.js';
 import './style/app.css';
 import Gamestate from './Gamestate.js';
 
-import { AppBar, Button, Typography, Container, ButtonGroup, Grid, Paper, Card, CardContent, Toolbar} from "@material-ui/core";
+import { AppBar, Button, Typography, Container, ButtonGroup, Grid, Paper, Card, CardContent, Toolbar, Box, LinearProgress} from "@material-ui/core";
 import {spacing} from "@material-ui/system"
 
 const gameTypes = [
@@ -127,24 +127,26 @@ class App extends Component {
         <Container maxWidth="sm">
           <Grid container direction="column" justify="center" alignItems="center stretch" spacing={3}>
             {[
-            <Board
-              gs={this.state.gs}
-              makeMove={this.makeMove}
-              player_turn={this.player_turn()}
-              animation_progression={this.state.animation_progression}
-              is_animating={this.state.is_animating}
-            />,
+            <React.Fragment>
+              <Info
+                gs={this.state.gs}
+                ai={this.state.ai}
+                think_progression={this.state.think_progression}
+              />
+              <Board
+                gs={this.state.gs}
+                makeMove={this.makeMove}
+                player_turn={this.player_turn()}
+                animation_progression={this.state.animation_progression}
+                is_animating={this.state.is_animating}
+              />
+            </React.Fragment>,
             <Settings
               game_type={this.state.game_type}
               color={this.state.color}
               onGameTypeToggle={this.onGameTypeToggle}
               onColorToggle={this.onColorToggle}
               onStart={this.onStart}
-            />,
-            <Info
-              gs={this.state.gs}
-              ai={this.state.ai}
-              think_progression={this.state.think_progression}
             />].map(element => {
               return (
                 <Grid item xs={12}>
@@ -166,24 +168,34 @@ class Settings extends Component {
   render () {
     return (
       <div>
-          <ButtonGroup variant="contained" color="primary" aria-label="contained primary button group">{
-            gameTypes.map(type => (
-              <Button key={type.id} disabled={type.id === this.props.game_type} onClick={() => this.props.onGameTypeToggle(type.id)}>
-                {type.innerHTML}
-              </Button>
-            ))}
-          </ButtonGroup>
-          {
-            this.props.game_type === "single_player" ?
-            <ButtonGroup variant="contained" color="primary" aria-label="contained primary button group">{
-              color.map(type => (
-                <Button key={type.id} disabled={type.id === this.props.color} onClick={() => this.props.onColorToggle(type.id)}>
-                  {type.innerHTML}
-                </Button>
-              ))}
-            </ButtonGroup> : <div />
-          }
-          <Button variant="contained" color="primary" onClick={this.props.onStart}>Start!</Button>
+          <Box mb={2} display="flex">
+            <Box flexGrow={1}>
+              <ButtonGroup size="small" variant="outlined" color="default" aria-label="outlined primary button group">{
+                gameTypes.map(type => (
+                  <Button key={type.id} disabled={type.id === this.props.game_type}
+                    variant={type.id === this.props.game_type ? "contained" : "outlined"}
+                    onClick={() => this.props.onGameTypeToggle(type.id)}>
+                    <Typography variant="button">{type.innerHTML}</Typography>
+                  </Button>
+                ))}
+              </ButtonGroup>
+            </Box>
+            {
+              this.props.game_type === "single_player" ?
+              <Box ml={2}>
+                <ButtonGroup size="small" variant="outlined" color="default" aria-label="outlined primary button group">{
+                  color.map(type => (
+                    <Button key={type.id} disabled={type.id === this.props.color}
+                      variant={type.id === this.props.color ? "contained" : "outlined"}
+                      onClick={() => this.props.onColorToggle(type.id)}>
+                      <Typography variant="button">{type.innerHTML}</Typography>
+                    </Button>
+                  ))}
+                </ButtonGroup>
+              </Box> : <div />
+            }
+          </Box>
+          <Button variant="contained" size = "small" color="primary" onClick={this.props.onStart}>Start!</Button>
       </div>
     )
   }
@@ -195,39 +207,31 @@ class Info extends Component {
     const {gs, ai} = this.props;
     var color = gs.winner != null ? gs.winner : gs.turn;
     return (
-      <div className="menu-div">
-        <h2 className={'info-font ' + (color === "B" ? "var-black" : "var-white")}>{
-          (ai == null ?
-          (color === "B" ? "black" : "white") :
-          color === ai.color ? "ai" : "player") +
-          (gs.winner === "B" ? " wins!" :
-          gs.winner === "W" ? " wins!" :
-          (" to " + (gs.action === "place" ? "place" :
-            gs.action === "take" ? "take" : "move")))
-        }</h2>
-      </div>
+      <Typography variant="h6" className={'info-font ' + (color === "B" ? "var-black" : "var-white")}>{
+        (ai == null ?
+        (color === "B" ? "black" : "white") :
+        color === ai.color ? "ai" : "player") +
+        (gs.winner === "B" ? " wins!" :
+        gs.winner === "W" ? " wins!" :
+        (" to " + (gs.action === "place" ? "place" :
+          gs.action === "take" ? "take" : "move")))
+      }</Typography>
     )
   }
 
   getProgressionBar = () => {
     return (
       this.props.ai == null || this.props.think_progression === 0 ? <div /> :
-      <div className="bottom">
-        <div className="menu-div progression-bar-outline">
-          <div className="progression-bar" style={{
-              width: (this.props.think_progression * 100) + '%'
-            }}/>
-        </div>
-      </div>
+      <LinearProgress variant="determinate" value={this.props.think_progression * 100}></LinearProgress>
     )
   }
 
   render () {
     return (
-      <div>
-        {this.getInfoText()}
-        {this.getProgressionBar()}
-      </div>
+      <Box mb={2} display="flex">
+        <Box mr={2}>{this.getInfoText()}</Box>
+        <Box flexGrow={1}>{this.getProgressionBar()}</Box>
+      </Box>
     )
   }
 }

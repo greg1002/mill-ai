@@ -8,7 +8,6 @@ export default function AI(gs, color) {
 
 AI.prototype.iterate = function(n) {
   if (n <= 0) {
-    console.log(this.tree.best_move());
     return;
   }
   this.tree.select().expand().simulate(50);

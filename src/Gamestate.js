@@ -50,20 +50,6 @@ Gamestate.prototype.setWinner = function (color) {
   this.possible_moves = [];
 }
 
-/* Returns the score in [0,1] representing standing for both players
-  1 if win, 0 if loss, or some value on (0,1) based on material
-*/
-Gamestate.prototype.score = function() {
-  let diff = Math.abs(this.pieces["B"] - this.pieces["W"]);
-  let score =
-    this.winner === "B" ? 1 :
-    this.winner === "W" ? 0 :
-    // Temporary formula TODO
-    this.pieces["B"] > this.pieces["W"] ? (diff + 1) / (diff + 2) :
-    1 / (diff + 2);
-  return {"B": score, "W": 1 - score}
-}
-
 /* Returns true if the placing phase has passed, else false */
 Gamestate.prototype.second_phase = function() {
   return this.place_count > board_layouts[this.board_type].pieces * 2

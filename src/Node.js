@@ -1,3 +1,4 @@
+import score from './Score.js';
 
 const EXPLORATION_PARAMETER = Math.sqrt(2);
 
@@ -52,7 +53,7 @@ Node.prototype.simulate = function(n) {
     gs.move(gs.random_move());
     i++;
   }
-  this.backpropogate(gs.score());
+  this.backpropogate(score(gs));
 }
 
 /* Returns the best move for player whose turn it is on this node's gamestate */
@@ -80,14 +81,12 @@ Node.prototype.backpropogate = function(s) {
 }
 
 //Returns the upper confidence bound of this node
-Node.prototype.UCT = function() {
-  if (this.parent == null) {
-    return 0;
-  }
-  if (this.simulations === 0) {
+Node.prototype.UCT = function(move) {
+  let child = this.get_child(move);
+  if (child.simulations === 0) {
     return 100;
   }
-  return this.score[this.gs.turn] / this.simulations + EXPLORATION_PARAMETER * Math.sqrt(Math.log(this.parent.simulations) / this.simulations);
+  return child.score[this.gs.turn] / child.simulations + EXPLORATION_PARAMETER * Math.sqrt(Math.log(this.simulations) / child.simulations);
 }
 
 // Returns true if current node is leaf, else false
@@ -99,17 +98,16 @@ Node.prototype.is_leaf = function() {
    a new Node based on the max UCT among a node's children */
 Node.prototype.select = function() {
   if (this.is_leaf()) return this;
-  let selectedChild = this.get_child(this.gs.possible_moves[0]);
-  let maxUCT = selectedChild.UCT();
+  let selectedMove = this.gs.possible_moves[0];
+  let maxUCT = this.UCT(selectedMove);
   for (let i = 1; i < this.gs.possible_moves.length; i++) {
     let move = this.gs.possible_moves[i];
-    let child = this.get_child(move);
-    let uct = child.UCT();
+    let uct = this.UCT(move);
     if (uct > maxUCT) {
-      selectedChild = child;
+      selectedMove = move;
       maxUCT = uct;
     }
     if (maxUCT === 100) break;
   }
-  return selectedChild.select()
+  return this.get_child(selectedMove).select()
 }
