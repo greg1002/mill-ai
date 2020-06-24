@@ -29,7 +29,9 @@ class App extends Component {
     game_type: "multi_player",
     color: "W",
     think_time: 3,
-    think_progression: 0
+    think_progression: 0,
+    simulations: 0,
+    ai_win_chance: .5
   }
 
   runAI = () => {
@@ -44,10 +46,16 @@ class App extends Component {
   makeMove = (x, y) => {
     let gs = this.state.gs.move({x: x, y: y});
     let ai = this.state.ai;
-    if (ai != null) ai.register_move({x: x, y: y});
+    if (ai != null) {
+      this.setState({
+        simulations: ai.tree.simulations,
+      });
+      ai.register_move({x: x, y: y});
+    }
     this.setState({gs, ai},
       this.state.gs.action !== "move_to" ? this.doMoveAnimation() : () => {},
-      this.checkAIMove()
+      this.checkAIMove(),
+      ai != null ? this.setState({ai_win_chance: ai.win_chance()}) : () => {}
     );
   }
 
@@ -132,6 +140,8 @@ class App extends Component {
                 gs={this.state.gs}
                 ai={this.state.ai}
                 think_progression={this.state.think_progression}
+                simulations={this.state.simulations}
+                ai_win_chance={this.state.ai_win_chance}
               />
               <Board
                 gs={this.state.gs}
@@ -203,11 +213,16 @@ class Settings extends Component {
 
 class Info extends Component {
 
-  getInfoText = () => {
+  state = {
+    win_chance: .5,
+    simulations: 0
+  }
+
+  getMoveText = () => {
     const {gs, ai} = this.props;
     var color = gs.winner != null ? gs.winner : gs.turn;
     return (
-      <Typography variant="h6" className={'info-font ' + (color === "B" ? "var-black" : "var-white")}>{
+      <Typography variant="subtitle1" className={color === "B" ? "var-black" : "var-white"}>{
         (ai == null ?
         (color === "B" ? "black" : "white") :
         color === ai.color ? "ai" : "player") +
@@ -219,18 +234,26 @@ class Info extends Component {
     )
   }
 
-  getProgressionBar = () => {
+  getWinChanceText = () => {
     return (
-      this.props.ai == null || this.props.think_progression === 0 ? <div /> :
-      <LinearProgress variant="determinate" value={this.props.think_progression * 100}></LinearProgress>
+      this.props.ai == null ? <div /> :
+      <Typography variant="subtitle1">{'AI winning chance: ' + (this.props.ai_win_chance + "").substring(0,5)}</Typography>
+    )
+  }
+
+  getSimCountText = () => {
+    return (
+      this.props.ai == null ? <div /> :
+      <Typography variant="subtitle1">{'Simulations run: ' + this.props.simulations}</Typography>
     )
   }
 
   render () {
     return (
       <Box mb={2} display="flex">
-        <Box mr={2}>{this.getInfoText()}</Box>
-        <Box flexGrow={1}>{this.getProgressionBar()}</Box>
+        <Box flexGrow={1}>{this.getMoveText()}</Box><br />
+      <Box mr={2}>{this.getWinChanceText()}</Box>
+        <Box>{this.getSimCountText()}</Box>
       </Box>
     )
   }

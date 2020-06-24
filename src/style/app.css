@@ -18,14 +18,6 @@
   background-color: black;
 }
 
-/* Text Settings*/
-.info-font {
-  font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace;
-  font-weight: bold;
-}
-.main-font {
-  font-family: Arial,Helvetica Neue,Helvetica,sans-serif;
-}
 .var-black {
   color: var(--black-color);
 }

@@ -21,3 +21,7 @@ AI.prototype.register_move = function(move) {
 AI.prototype.best_move = function() {
   return this.tree.best_move();
 }
+
+AI.prototype.win_chance = function() {
+  return this.tree.score[this.color] / this.tree.simulations;
+}
