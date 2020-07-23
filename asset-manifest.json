@@ -1,22 +1,22 @@
 {
   "files": {
-    "main.css": "/react-gh-pages/static/css/main.254992a6.chunk.css",
-    "main.js": "/react-gh-pages/static/js/main.619dcab8.chunk.js",
-    "main.js.map": "/react-gh-pages/static/js/main.619dcab8.chunk.js.map",
-    "runtime-main.js": "/react-gh-pages/static/js/runtime-main.5adfcf8c.js",
-    "runtime-main.js.map": "/react-gh-pages/static/js/runtime-main.5adfcf8c.js.map",
-    "static/js/2.f51e5894.chunk.js": "/react-gh-pages/static/js/2.f51e5894.chunk.js",
-    "static/js/2.f51e5894.chunk.js.map": "/react-gh-pages/static/js/2.f51e5894.chunk.js.map",
-    "index.html": "/react-gh-pages/index.html",
-    "precache-manifest.c5f772d30244c87e33a68a7bcded550c.js": "/react-gh-pages/precache-manifest.c5f772d30244c87e33a68a7bcded550c.js",
-    "service-worker.js": "/react-gh-pages/service-worker.js",
-    "static/css/main.254992a6.chunk.css.map": "/react-gh-pages/static/css/main.254992a6.chunk.css.map",
-    "static/js/2.f51e5894.chunk.js.LICENSE": "/react-gh-pages/static/js/2.f51e5894.chunk.js.LICENSE",
-    "static/media/board_small.png": "/react-gh-pages/static/media/board_small.e676a496.png",
-    "static/media/board_standard.png": "/react-gh-pages/static/media/board_standard.fc18406c.png"
+    "main.css": "/mill-ai/static/css/main.254992a6.chunk.css",
+    "main.js": "/mill-ai/static/js/main.619dcab8.chunk.js",
+    "main.js.map": "/mill-ai/static/js/main.619dcab8.chunk.js.map",
+    "runtime-main.js": "/mill-ai/static/js/runtime-main.7e24f995.js",
+    "runtime-main.js.map": "/mill-ai/static/js/runtime-main.7e24f995.js.map",
+    "static/js/2.f51e5894.chunk.js": "/mill-ai/static/js/2.f51e5894.chunk.js",
+    "static/js/2.f51e5894.chunk.js.map": "/mill-ai/static/js/2.f51e5894.chunk.js.map",
+    "index.html": "/mill-ai/index.html",
+    "precache-manifest.c0bc6632231fb2550ca0abe1c7f78123.js": "/mill-ai/precache-manifest.c0bc6632231fb2550ca0abe1c7f78123.js",
+    "service-worker.js": "/mill-ai/service-worker.js",
+    "static/css/main.254992a6.chunk.css.map": "/mill-ai/static/css/main.254992a6.chunk.css.map",
+    "static/js/2.f51e5894.chunk.js.LICENSE": "/mill-ai/static/js/2.f51e5894.chunk.js.LICENSE",
+    "static/media/board_small.png": "/mill-ai/static/media/board_small.e676a496.png",
+    "static/media/board_standard.png": "/mill-ai/static/media/board_standard.fc18406c.png"
   },
   "entrypoints": [
-    "static/js/runtime-main.5adfcf8c.js",
+    "static/js/runtime-main.7e24f995.js",
     "static/js/2.f51e5894.chunk.js",
     "static/css/main.254992a6.chunk.css",
     "static/js/main.619dcab8.chunk.js"
