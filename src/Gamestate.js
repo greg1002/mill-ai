@@ -1,4 +1,4 @@
-import board_layouts from './Layouts.js';
+import board_layouts from './layouts.json';
 import _ from 'lodash';
 
 export default function Gamestate(board_type, turn) {

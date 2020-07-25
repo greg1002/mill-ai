@@ -2,7 +2,33 @@ import score from './Score.js';
 
 const EXPLORATION_PARAMETER = Math.sqrt(2);
 
-export default function Node(gs) {
+export default function MCTS(gs, color) {
+  this.tree = new Node(gs, color);
+  this.interval = null;
+  this.color = color;
+}
+
+MCTS.prototype.iterate = function(n) {
+  if (n <= 0) {
+    return;
+  }
+  this.tree.select().expand().simulate(25);
+  this.iterate(n-1);
+}
+
+MCTS.prototype.register_move = function(move) {
+  this.tree.advance(move);
+}
+
+MCTS.prototype.best_move = function() {
+  return this.tree.best_move();
+}
+
+MCTS.prototype.win_chance = function() {
+  return this.tree.score[this.color] / this.tree.simulations;
+}
+
+function Node(gs) {
   this.gs = gs;
   this.children = new Map();
   this.simulations = 0;

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import board_layouts from './Layouts.js';
+import board_layouts from './layouts.json';
 import './style/app.css';
 import ReactCursorPosition, { INTERACTIONS } from 'react-cursor-position';
 

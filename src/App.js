@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Board from './Board.js';
-import AI from './AI.js';
+import MCTS from './MCTS.js';
 import './style/app.css';
 import Gamestate from './Gamestate.js';
 
@@ -12,26 +12,37 @@ const gameTypes = [
   {innerHTML: "Multiplayer", id: 'multi_player'}
 ]
 
+const boardTypes = [
+  {innerHTML: "Small Board", id: "board_small"},
+  {innerHTML: "Standard Board", id: "board_standard"}
+]
+
 const color = [
-  {innerHTML: "Black", id: "B"},
-  {innerHTML: "White", id: "W"}
+  {innerHTML: "White", id: "W"},
+  {innerHTML: "Black", id: "B"}
 ]
 
 const ANIMATION_LENGTH = 200;
 
 class App extends Component {
+
   state = {
     gs: new Gamestate("board_standard", "W"),
     ai: null,
     animation_progression: 1,
     is_animating: false,
     ai_interval: null,
-    game_type: "multi_player",
+    game_type: "single_player",
+    board_type: "board_standard",
     color: "W",
     think_time: 3,
     think_progression: 0,
     simulations: 0,
     ai_win_chance: .5
+  };
+
+  componentDidMount() {
+    this.onStart();
   }
 
   runAI = () => {
@@ -107,18 +118,22 @@ class App extends Component {
     this.setState({color});
   }
 
+  onBoardTypeToggle = (board_type) => {
+    this.setState({board_type});
+  }
+
   player_turn = () => {
     return this.state.ai != null ?
       this.state.ai.color !== this.state.gs.turn : true;
   }
 
   onStart = () => {
-    let gs = new Gamestate("board_standard", "W");
+    let gs = new Gamestate(this.state.board_type, "W");
     let ai = null;
     let ai_interval = null;
     clearInterval(this.state.ai_interval);
     if (this.state.game_type === "single_player") {
-      ai = new AI(gs, this.state.color === "B" ? "W" : "B");
+      ai = new MCTS(gs, this.state.color === "B" ? "W" : "B");
     }
     this.setState({gs, ai, ai_interval}, () => {
       if (ai != null) {
@@ -132,7 +147,7 @@ class App extends Component {
     return (
       <React.Fragment>
         <Nav />
-        <Container maxWidth="sm">
+      <Container maxWidth="sm">
           <Grid container direction="column" justify="center" alignItems="center stretch" spacing={3}>
             {[
             <React.Fragment>
@@ -154,8 +169,10 @@ class App extends Component {
             <Settings
               game_type={this.state.game_type}
               color={this.state.color}
+              board_type={this.state.board_type}
               onGameTypeToggle={this.onGameTypeToggle}
               onColorToggle={this.onColorToggle}
+              onBoardTypeToggle={this.onBoardTypeToggle}
               onStart={this.onStart}
             />].map(element => {
               return (
@@ -175,37 +192,42 @@ class App extends Component {
 
 class Settings extends Component {
 
+  getButton = (options, activeOption, onToggle) => {
+    return (
+      <ButtonGroup size="small" variant="outlined" color="default" aria-label="outlined primary button group">{
+        options.map(option => (
+          <Button key={option.id} disabled={option.id === activeOption}
+            variant={option.id === activeOption ? "contained" : "outlined"}
+            onClick={() => onToggle(option.id)}>
+            <Typography variant="button">{option.innerHTML}</Typography>
+          </Button>
+        ))}
+      </ButtonGroup>
+    )
+  }
+
   render () {
     return (
       <div>
           <Box mb={2} display="flex">
             <Box flexGrow={1}>
-              <ButtonGroup size="small" variant="outlined" color="default" aria-label="outlined primary button group">{
-                gameTypes.map(type => (
-                  <Button key={type.id} disabled={type.id === this.props.game_type}
-                    variant={type.id === this.props.game_type ? "contained" : "outlined"}
-                    onClick={() => this.props.onGameTypeToggle(type.id)}>
-                    <Typography variant="button">{type.innerHTML}</Typography>
-                  </Button>
-                ))}
-              </ButtonGroup>
+              {this.getButton(gameTypes, this.props.game_type, this.props.onGameTypeToggle)}
             </Box>
             {
-              this.props.game_type === "single_player" ?
-              <Box ml={2}>
-                <ButtonGroup size="small" variant="outlined" color="default" aria-label="outlined primary button group">{
-                  color.map(type => (
-                    <Button key={type.id} disabled={type.id === this.props.color}
-                      variant={type.id === this.props.color ? "contained" : "outlined"}
-                      onClick={() => this.props.onColorToggle(type.id)}>
-                      <Typography variant="button">{type.innerHTML}</Typography>
-                    </Button>
-                  ))}
-                </ButtonGroup>
-              </Box> : <div />
+            this.props.game_type === "single_player" ?
+            <Box ml={2}>
+              {this.getButton(color, this.props.color, this.props.onColorToggle)}
+            </Box> : <div />
             }
           </Box>
-          <Button variant="contained" size = "small" color="primary" onClick={this.props.onStart}>Start!</Button>
+          <Box display="flex">
+            <Box flexGrow={1}>
+              {this.getButton(boardTypes, this.props.board_type, this.props.onBoardTypeToggle)}
+            </Box>
+            <Box ml={2}>
+              <Button variant="contained" size = "small" color="primary" onClick={this.props.onStart}>Start!</Button>
+            </Box>
+          </Box>
       </div>
     )
   }
