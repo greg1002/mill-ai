@@ -27,13 +27,13 @@ const ANIMATION_LENGTH = 200;
 class App extends Component {
 
   state = {
-    gs: new Gamestate("board_standard", "W"),
+    gs: new Gamestate("board_small", "W"),
     ai: null,
     animation_progression: 1,
     is_animating: false,
     ai_interval: null,
     game_type: "single_player",
-    board_type: "board_standard",
+    board_type: "board_small",
     color: "W",
     think_time: 3,
     think_progression: 0,
@@ -151,7 +151,7 @@ class App extends Component {
           <Grid container direction="column" justify="center" alignItems="center stretch" spacing={3}>
             {[
             <React.Fragment>
-              <Info
+              <TopInfo
                 gs={this.state.gs}
                 ai={this.state.ai}
                 think_progression={this.state.think_progression}
@@ -164,6 +164,10 @@ class App extends Component {
                 player_turn={this.player_turn()}
                 animation_progression={this.state.animation_progression}
                 is_animating={this.state.is_animating}
+              />
+              <BottomInfo
+                gs={this.state.gs}
+                ai={this.state.ai}
               />
             </React.Fragment>,
             <Settings
@@ -233,7 +237,7 @@ class Settings extends Component {
   }
 }
 
-class Info extends Component {
+class TopInfo extends Component {
 
   state = {
     win_chance: .5,
@@ -272,10 +276,49 @@ class Info extends Component {
 
   render () {
     return (
-      <Box mb={2} display="flex">
+      <Box mb={1} width={1} display="flex">
         <Box flexGrow={1}>{this.getMoveText()}</Box><br />
-      <Box mr={2}>{this.getWinChanceText()}</Box>
+        <Box mr={2}>{this.getWinChanceText()}</Box>
         <Box>{this.getSimCountText()}</Box>
+      </Box>
+    )
+  }
+}
+
+class BottomInfo extends Component {
+
+  getBlackPieceCountText = () => {
+    const { gs, ai } = this.props;
+    return (
+      <Typography variant="subtitle1" className="var-black">
+        {ai == null ? "black: " : ai.color === "B" ? "ai: " : "player: "}
+        {gs.pieces_to_place("B")}
+      </Typography>
+    )
+  }
+
+  getWhitePieceCountText = () => {
+    const { gs, ai } = this.props;
+    return (
+      <Typography variant="subtitle1" className="var-white">
+        {ai == null ? "white: " : ai.color === "W" ? "ai: " : "player: "}
+        {gs.pieces_to_place("W")}
+      </Typography>
+    )
+  }
+
+  render () {
+    return (
+      <Box mt={1} width={1} display="flex">
+        <Box mr={2}>
+          <Typography variant="subtitle1">Pieces left: </Typography>
+        </Box>
+        <Box flexGrow={1}>
+          {this.getWhitePieceCountText()}
+        </Box>
+        <Box width={40}>
+          {this.getBlackPieceCountText()}
+        </Box>
       </Box>
     )
   }

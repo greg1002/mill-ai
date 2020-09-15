@@ -2,31 +2,39 @@ import board_layouts from './layouts.json';
 import _ from 'lodash';
 
 export default function Gamestate(board_type, turn) {
+  let board_layout = board_layouts[board_type];
   //Player's whose turn it is
   this.turn = turn;
   //Action to do
   this.action = "place";
   //Moves since the beginning of the game
-  this.place_count = 1;
+  this.place_count = 0;
   //Board type
   this.board_type = board_type;
   /* Array representing the game board
      For each tile on the board, "B" represents a black piece,
      "W" a white piece, "E" an empty spot, and null no spot at all */
-  this.board = JSON.parse(JSON.stringify(board_layouts[this.board_type].init));
+  this.board = JSON.parse(JSON.stringify(board_layout.init));
   // Temporary placeholder for selected tile after 'move_from' command
   this.selected = null;
   // List of all possible moves from posititon
   this.possible_moves = [];
   // Tuple representing the pieces in game for black and white
   this.pieces = {"B": 0, "W": 0};
+  this.pieces_left_to_place = {"B": board_layout.pieces, "W": board_layout.pieces }
   this.winner = null;
+
 
   this.history = [];
 
   this.mills = {"B": [], "W": []};
 
   this.get_possible_moves();
+}
+
+/* Returns the pieces left to place for color [color] */
+Gamestate.prototype.pieces_to_place = function (color) {
+  return this.pieces_left_to_place[color];
 }
 
 /* Returns a random valid move for this gamestate */
@@ -52,7 +60,7 @@ Gamestate.prototype.setWinner = function (color) {
 
 /* Returns true if the placing phase has passed, else false */
 Gamestate.prototype.second_phase = function() {
-  return this.place_count > board_layouts[this.board_type].pieces * 2
+  return this.place_count >= board_layouts[this.board_type].pieces * 2
 }
 
 /* Clones this game state */
@@ -96,6 +104,7 @@ Gamestate.prototype.move = function(command) {
     } else {
       this.place_count++;
       this.pieces[this.turn] += 1;
+      this.pieces_left_to_place[this.turn] -= 1;
     }
 
     //checks if new place for piece would newly form a mill
