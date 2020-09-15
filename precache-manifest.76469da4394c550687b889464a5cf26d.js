@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "c49de43b403fa9c58ed65c24199a40de",
+    "revision": "f0a8ec60b6b84cb64e0b7a2c82962f85",
     "url": "/mill-ai/index.html"
   },
   {
-    "revision": "7c17c26832767f745a72",
+    "revision": "5d0df28b44e4d4707257",
     "url": "/mill-ai/static/css/main.254992a6.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/mill-ai/static/js/2.10e592eb.chunk.js.LICENSE"
   },
   {
-    "revision": "7c17c26832767f745a72",
-    "url": "/mill-ai/static/js/main.54e1161e.chunk.js"
+    "revision": "5d0df28b44e4d4707257",
+    "url": "/mill-ai/static/js/main.bf5f55fc.chunk.js"
   },
   {
     "revision": "563ce8d321b04d2a5535",

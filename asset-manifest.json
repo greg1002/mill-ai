@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/mill-ai/static/css/main.254992a6.chunk.css",
-    "main.js": "/mill-ai/static/js/main.54e1161e.chunk.js",
-    "main.js.map": "/mill-ai/static/js/main.54e1161e.chunk.js.map",
+    "main.js": "/mill-ai/static/js/main.bf5f55fc.chunk.js",
+    "main.js.map": "/mill-ai/static/js/main.bf5f55fc.chunk.js.map",
     "runtime-main.js": "/mill-ai/static/js/runtime-main.7e24f995.js",
     "runtime-main.js.map": "/mill-ai/static/js/runtime-main.7e24f995.js.map",
     "static/js/2.10e592eb.chunk.js": "/mill-ai/static/js/2.10e592eb.chunk.js",
     "static/js/2.10e592eb.chunk.js.map": "/mill-ai/static/js/2.10e592eb.chunk.js.map",
     "index.html": "/mill-ai/index.html",
-    "precache-manifest.1057a5718419b53c592bbcc531c03f82.js": "/mill-ai/precache-manifest.1057a5718419b53c592bbcc531c03f82.js",
+    "precache-manifest.76469da4394c550687b889464a5cf26d.js": "/mill-ai/precache-manifest.76469da4394c550687b889464a5cf26d.js",
     "service-worker.js": "/mill-ai/service-worker.js",
     "static/css/main.254992a6.chunk.css.map": "/mill-ai/static/css/main.254992a6.chunk.css.map",
     "static/js/2.10e592eb.chunk.js.LICENSE": "/mill-ai/static/js/2.10e592eb.chunk.js.LICENSE"
@@ -17,6 +17,6 @@
     "static/js/runtime-main.7e24f995.js",
     "static/js/2.10e592eb.chunk.js",
     "static/css/main.254992a6.chunk.css",
-    "static/js/main.54e1161e.chunk.js"
+    "static/js/main.bf5f55fc.chunk.js"
   ]
 }
