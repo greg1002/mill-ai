@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/mill-ai/precache-manifest.c0bc6632231fb2550ca0abe1c7f78123.js"
+  "/mill-ai/precache-manifest.1057a5718419b53c592bbcc531c03f82.js"
 );
 
 self.addEventListener('message', (event) => {
