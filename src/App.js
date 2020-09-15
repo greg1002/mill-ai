@@ -131,11 +131,13 @@ class App extends Component {
     let gs = new Gamestate(this.state.board_type, "W");
     let ai = null;
     let ai_interval = null;
+    let ai_win_chance = "N/A";
+    let simulations = 0;
     clearInterval(this.state.ai_interval);
     if (this.state.game_type === "single_player") {
       ai = new MCTS(gs, this.state.color === "B" ? "W" : "B");
     }
-    this.setState({gs, ai, ai_interval}, () => {
+    this.setState({gs, ai, ai_interval, ai_win_chance, simulations}, () => {
       if (ai != null) {
         this.runAI();
         this.checkAIMove();
