@@ -1,22 +1,22 @@
 {
   "files": {
     "main.css": "/mill-ai/static/css/main.254992a6.chunk.css",
-    "main.js": "/mill-ai/static/js/main.bf5f55fc.chunk.js",
-    "main.js.map": "/mill-ai/static/js/main.bf5f55fc.chunk.js.map",
-    "runtime-main.js": "/mill-ai/static/js/runtime-main.7e24f995.js",
-    "runtime-main.js.map": "/mill-ai/static/js/runtime-main.7e24f995.js.map",
-    "static/js/2.10e592eb.chunk.js": "/mill-ai/static/js/2.10e592eb.chunk.js",
-    "static/js/2.10e592eb.chunk.js.map": "/mill-ai/static/js/2.10e592eb.chunk.js.map",
+    "main.js": "/mill-ai/static/js/main.780b6365.chunk.js",
+    "main.js.map": "/mill-ai/static/js/main.780b6365.chunk.js.map",
+    "runtime-main.js": "/mill-ai/static/js/runtime-main.14fcd5ae.js",
+    "runtime-main.js.map": "/mill-ai/static/js/runtime-main.14fcd5ae.js.map",
+    "static/js/2.af83c496.chunk.js": "/mill-ai/static/js/2.af83c496.chunk.js",
+    "static/js/2.af83c496.chunk.js.map": "/mill-ai/static/js/2.af83c496.chunk.js.map",
     "index.html": "/mill-ai/index.html",
-    "precache-manifest.76469da4394c550687b889464a5cf26d.js": "/mill-ai/precache-manifest.76469da4394c550687b889464a5cf26d.js",
+    "precache-manifest.f58ead4a0ff5518ca36fc84692319388.js": "/mill-ai/precache-manifest.f58ead4a0ff5518ca36fc84692319388.js",
     "service-worker.js": "/mill-ai/service-worker.js",
     "static/css/main.254992a6.chunk.css.map": "/mill-ai/static/css/main.254992a6.chunk.css.map",
-    "static/js/2.10e592eb.chunk.js.LICENSE": "/mill-ai/static/js/2.10e592eb.chunk.js.LICENSE"
+    "static/js/2.af83c496.chunk.js.LICENSE": "/mill-ai/static/js/2.af83c496.chunk.js.LICENSE"
   },
   "entrypoints": [
-    "static/js/runtime-main.7e24f995.js",
-    "static/js/2.10e592eb.chunk.js",
+    "static/js/runtime-main.14fcd5ae.js",
+    "static/js/2.af83c496.chunk.js",
     "static/css/main.254992a6.chunk.css",
-    "static/js/main.bf5f55fc.chunk.js"
+    "static/js/main.780b6365.chunk.js"
   ]
 }
